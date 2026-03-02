@@ -6,6 +6,7 @@ import { parseExcelNPS } from "@/lib/excel-parser-nps";
 import ExcelJS from "exceljs";
 import { DadosRelatorioAny, DadosRelatorioComparativo, DadosRelatorioNPS } from "@/types";
 import { auth } from "@/lib/auth";
+import type { Session } from "next-auth";
 
 type TipoRelatorio = "SAUDE" | "COMPARATIVO" | "NPS";
 
@@ -41,7 +42,7 @@ function getDataColeta(dados: DadosRelatorioAny): Date {
   return parseDateOrNow((dados as { empresa: { dataColeta: string } }).empresa.dataColeta);
 }
 
-async function resolveUsuarioIdFromSession(session: Awaited<ReturnType<typeof auth>>): Promise<string | null> {
+async function resolveUsuarioIdFromSession(session: Session | null): Promise<string | null> {
   const sessionUserId = session?.user?.id;
   const sessionUserEmail = session?.user?.email;
 
