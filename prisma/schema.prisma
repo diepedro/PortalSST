@@ -1,0 +1,122 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  password  String
+  role      Role     @default(USER)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("users")
+}
+
+enum Role {
+  ADMIN
+  USER
+}
+
+model Empresa {
+  id         String      @id @default(cuid())
+  nome       String
+  endereco   String?
+  contato    String?
+  createdAt  DateTime    @default(now()) @map("created_at")
+  relatorios Relatorio[]
+  atividades Atividade[]
+
+  @@map("empresas")
+}
+
+model Profissional {
+  id              String      @id @default(cuid())
+  nome            String
+  profissao       String
+  especialidade   String?
+  disponibilidade String?
+  contato         String?
+  portfolioUrl    String?     @map("portfolio_url")
+  ativo           Boolean     @default(true)
+  createdAt       DateTime    @default(now()) @map("created_at")
+  atividades      Atividade[]
+  atividadesSecundarias Atividade[] @relation("ProfissionalSecundario")
+
+  @@map("profissionais")
+}
+
+model Relatorio {
+  id         String   @id @default(cuid())
+  empresaId  String   @map("empresa_id")
+  empresa    Empresa  @relation(fields: [empresaId], references: [id])
+  dataColeta DateTime @map("data_coleta")
+  dados      Json
+  pdfUrl     String?  @map("pdf_url")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  @@map("relatorios")
+}
+
+model Atividade {
+  id             String          @id @default(cuid())
+  data           DateTime
+  tipo           TipoAtividade
+  empresaId      String          @map("empresa_id")
+  empresa        Empresa         @relation(fields: [empresaId], references: [id])
+  profissionalId String?         @map("profissional_id")
+  profissional   Profissional?   @relation(fields: [profissionalId], references: [id])
+  profissional2Id String?        @map("profissional_2_id")
+  profissional2  Profissional?   @relation("ProfissionalSecundario", fields: [profissional2Id], references: [id])
+  titulo         String
+  endereco       String?
+  cidade         String?
+  gpsLat         Float?          @map("gps_lat")
+  gpsLng         Float?          @map("gps_lng")
+  ajudaCusto     Boolean         @default(false) @map("ajuda_custo")
+  transporte     Transporte?
+  blitzHoras     Int?            @map("blitz_horas")
+  horaEntrada    String?         @map("hora_entrada")
+  horaSaida      String?         @map("hora_saida")
+  qtdPalestras   Int?            @map("qtd_palestras")
+  kmRodado       Float?          @map("km_rodado")
+  colaboradores  Int             @default(0)
+  materiais      String?
+  status         StatusAtividade @default(AGENDADA)
+  createdAt      DateTime        @default(now()) @map("created_at")
+
+  @@map("atividades")
+}
+
+enum TipoAtividade {
+  BLITZ
+  PALESTRA
+  SIPAT
+}
+
+enum StatusAtividade {
+  AGENDADA
+  REALIZADA
+  CANCELADA
+}
+
+enum Transporte {
+  MOTORISTA
+  CARRO_PROPRIO
+}
+
+model Arquivo {
+  id        String   @id @default(cuid())
+  nome      String
+  tipo      String
+  tamanho   Int
+  url       String
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("arquivos")
+}

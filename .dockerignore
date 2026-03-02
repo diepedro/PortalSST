@@ -1,0 +1,9 @@
+node_modules
+.next
+.git
+.gitignore
+uploads
+.env
+.env.local
+.env.example
+*.bat
