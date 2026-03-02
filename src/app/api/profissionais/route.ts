@@ -63,6 +63,7 @@ export async function POST(req: NextRequest) {
     });
     return NextResponse.json(profissional, { status: 201 });
   } catch (error) {
+    console.error("Erro ao cadastrar profissional", error);
     return NextResponse.json(
       { error: "Erro ao cadastrar profissional" },
       { status: 500 }
@@ -79,7 +80,8 @@ export async function PATCH(req: NextRequest) {
       data,
     });
     return NextResponse.json(profissional);
-  } catch {
+  } catch (error) {
+    console.error("Erro ao atualizar profissional", error);
     return NextResponse.json({ error: "Erro ao atualizar" }, { status: 500 });
   }
 }

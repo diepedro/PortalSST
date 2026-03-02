@@ -4,6 +4,8 @@ import Link from "next/link";
 import { Topbar } from "@/components/dashboard/topbar";
 import { StatCard } from "@/components/dashboard/stat-card";
 import { prisma } from "@/lib/prisma";
+import { auth } from "@/lib/auth";
+import { redirect } from "next/navigation";
 import {
   FileBarChart,
   CalendarDays,
@@ -76,6 +78,14 @@ function DaysChip({ iso }: { iso: string | Date }) {
 }
 
 export default async function DashboardPage() {
+  const session = await auth();
+  const role = (session?.user as any)?.role;
+
+  // Redireciona clientes que so tem acesso a agenda
+  if (role === "CLIENTE") {
+    redirect("/dashboard/agenda");
+  }
+
   const stats = await getStats();
 
   return (
@@ -277,7 +287,7 @@ export default async function DashboardPage() {
                         </p>
                         {rel.pdfUrl && (
                           <a
-                            href={`/api/relatorios/${rel.id}/download`}
+                            href={`/api/relatorios/${rel.id}/pdf`}
                             target="_blank"
                             className="text-xs text-[#1e3a8a] hover:underline"
                           >

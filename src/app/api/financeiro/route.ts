@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { auth } from "@/lib/auth";
 import {
   AJUDA_CUSTO_VALOR,
   PALESTRA_VALOR,
@@ -7,6 +8,16 @@ import {
 } from "@/lib/financeiro";
 
 export async function GET(req: NextRequest) {
+  const session = await auth();
+  if (!session?.user) {
+    return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
+  }
+
+  const role = (session.user as any).role;
+  if (role !== "ADMIN") {
+    return NextResponse.json({ error: "Acesso negado" }, { status: 403 });
+  }
+
   try {
     const { dataInicio, dataFimExclusiva, rawInicio, rawFim } = parsePeriodo(
       req.nextUrl.searchParams

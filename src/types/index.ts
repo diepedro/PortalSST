@@ -1,3 +1,23 @@
+export interface Participante {
+  nome: string;
+  idade: number;
+  idadeFaixa: string;
+  genero: number; // 1: F, 2: M
+  imc: number;
+  imcStatus: string;
+  imcAlterado: boolean;
+  pa: string;
+  paStatus: string;
+  paAlterado: boolean;
+  glicemia: number;
+  glicemiaStatus: string;
+  glicemiaAlterado: boolean;
+  fc: number;
+  fcStatus: string;
+  fcAlterado: boolean;
+  comorbidades: string;
+}
+
 export interface DadosRelatorio {
   empresa: {
     nome: string;
@@ -36,6 +56,21 @@ export interface DadosRelatorio {
     hipertensaoEst2: number;
     hipertensaoEst3: number;
   };
+  glicemia?: {
+    normal: number; // <= 110 (legacy)
+    alterada: number; // > 110 (legacy)
+    hipoglicemia?: number;
+    normoglicemia?: number;
+    hiperglicemia?: number;
+  };
+  frequenciaCardiaca?: {
+    normal: number; // (legacy)
+    alterada: number; // (legacy)
+    bradicardia?: number;
+    normocardia?: number;
+    taquicardia?: number;
+  };
+  participantes?: Participante[];
 }
 
 export interface CategoriaComparativa {
@@ -59,7 +94,23 @@ export interface DadosRelatorioComparativo {
   glicemiaCapilar: CategoriaComparativa[];
 }
 
-export type DadosRelatorioAny = DadosRelatorio | DadosRelatorioComparativo;
+export interface DadosRelatorioNPS {
+  tipo: "NPS";
+  empresa: {
+    nome: string;
+    data: string;
+    totalRespostas: number;
+  };
+  score: number; // % Promotores - % Detratores
+  distribuicao: {
+    promotores: { total: number; percentual: number };
+    passivos: { total: number; percentual: number };
+    detratores: { total: number; percentual: number };
+  };
+  notas: { nota: number; total: number }[]; // 0 a 10
+}
+
+export type DadosRelatorioAny = DadosRelatorio | DadosRelatorioComparativo | DadosRelatorioNPS;
 
 export interface StatCardData {
   title: string;

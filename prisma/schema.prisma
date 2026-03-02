@@ -7,20 +7,26 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
-  id        String   @id @default(cuid())
-  name      String
-  email     String   @unique
-  password  String
-  role      Role     @default(USER)
-  createdAt DateTime @default(now()) @map("created_at")
-
-  @@map("users")
-}
-
 enum Role {
   ADMIN
+  TECNICO
   USER
+  CLIENTE
+}
+
+model User {
+  id         String      @id @default(cuid())
+  name       String
+  email      String      @unique
+  password   String
+  role       Role        @default(USER)
+  empresaId  String?     @map("empresa_id")
+  empresa    Empresa?    @relation(fields: [empresaId], references: [id])
+  createdAt  DateTime    @default(now()) @map("created_at")
+  relatorios Relatorio[]
+  atividades Atividade[]
+
+  @@map("users")
 }
 
 model Empresa {
@@ -31,9 +37,11 @@ model Empresa {
   createdAt  DateTime    @default(now()) @map("created_at")
   relatorios Relatorio[]
   atividades Atividade[]
+  usuarios   User[]      // New relation
 
   @@map("empresas")
 }
+
 
 model Profissional {
   id              String      @id @default(cuid())
@@ -55,6 +63,8 @@ model Relatorio {
   id         String   @id @default(cuid())
   empresaId  String   @map("empresa_id")
   empresa    Empresa  @relation(fields: [empresaId], references: [id])
+  usuarioId  String?  @map("usuario_id")
+  usuario    User?    @relation(fields: [usuarioId], references: [id])
   dataColeta DateTime @map("data_coleta")
   dados      Json
   pdfUrl     String?  @map("pdf_url")
@@ -69,6 +79,8 @@ model Atividade {
   tipo           TipoAtividade
   empresaId      String          @map("empresa_id")
   empresa        Empresa         @relation(fields: [empresaId], references: [id])
+  usuarioId      String?         @map("usuario_id")
+  usuario        User?           @relation(fields: [usuarioId], references: [id])
   profissionalId String?         @map("profissional_id")
   profissional   Profissional?   @relation(fields: [profissionalId], references: [id])
   profissional2Id String?        @map("profissional_2_id")
@@ -100,6 +112,7 @@ enum TipoAtividade {
 }
 
 enum StatusAtividade {
+  SOLICITADA
   AGENDADA
   REALIZADA
   CANCELADA
