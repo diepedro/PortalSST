@@ -1,9 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { auth } from "@/lib/auth";
 import fs from "fs";
 import path from "path";
 
 export async function GET() {
+  const session = await auth();
+  if (!session?.user?.id) {
+    return NextResponse.json({ error: "Nao autorizado" }, { status: 401 });
+  }
+  if ((session.user as any).role === "COLETA") {
+    return NextResponse.json({ error: "Permissao insuficiente" }, { status: 403 });
+  }
+
   const profissionais = await prisma.profissional.findMany({
     orderBy: { createdAt: "desc" },
   });
@@ -11,6 +20,14 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
+  const session = await auth();
+  if (!session?.user?.id) {
+    return NextResponse.json({ error: "Nao autorizado" }, { status: 401 });
+  }
+  if ((session.user as any).role === "COLETA") {
+    return NextResponse.json({ error: "Permissao insuficiente" }, { status: 403 });
+  }
+
   try {
     const contentType = req.headers.get("content-type") || "";
     let nome = "";
@@ -72,6 +89,14 @@ export async function POST(req: NextRequest) {
 }
 
 export async function PATCH(req: NextRequest) {
+  const session = await auth();
+  if (!session?.user?.id) {
+    return NextResponse.json({ error: "Nao autorizado" }, { status: 401 });
+  }
+  if ((session.user as any).role === "COLETA") {
+    return NextResponse.json({ error: "Permissao insuficiente" }, { status: 403 });
+  }
+
   try {
     const body = await req.json();
     const { id, ...data } = body;

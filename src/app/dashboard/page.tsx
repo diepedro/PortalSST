@@ -81,9 +81,12 @@ export default async function DashboardPage() {
   const session = await auth();
   const role = (session?.user as any)?.role;
 
-  // Redireciona clientes que so tem acesso a agenda
+  // Redireciona perfis com experiencia reduzida
   if (role === "CLIENTE") {
     redirect("/dashboard/agenda");
+  }
+  if (role === "COLETA") {
+    redirect("/dashboard/planilhas");
   }
 
   const stats = await getStats();

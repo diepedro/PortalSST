@@ -31,6 +31,9 @@ export async function GET(
 
   const { id } = await context.params;
   const role = (session.user as any).role;
+  if (role === "COLETA") {
+    return NextResponse.json({ error: "Permissao insuficiente" }, { status: 403 });
+  }
 
   const relatorio = await prisma.relatorio.findUnique({
     where: { id },
@@ -79,3 +82,5 @@ export async function GET(
     return NextResponse.json({ error: `Erro na criação do PDF: ${msg}` }, { status: 500 });
   }
 }
+
+
