@@ -17,7 +17,7 @@ async function main() {
     },
   });
 
-  const empresa = await prisma.empresa.upsert({
+  await prisma.empresa.upsert({
     where: { id: "seed-empresa-1" },
     update: {},
     create: {

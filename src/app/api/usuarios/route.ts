@@ -16,7 +16,15 @@ export async function GET() {
     return NextResponse.json({ error: "Acesso restrito" }, { status: 403 });
   }
   const users = await prisma.user.findMany({
-    select: { id: true, name: true, email: true, role: true, createdAt: true },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      role: true,
+      createdAt: true,
+      empresaId: true,
+      empresa: { select: { nome: true } },
+    },
     orderBy: { createdAt: "asc" },
   });
   return NextResponse.json(users);
@@ -27,7 +35,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Acesso restrito" }, { status: 403 });
   }
   try {
-    const { name, email, password, role } = await req.json();
+    const { name, email, password, role, empresaId } = await req.json();
     if (!name || !email || !password) {
       return NextResponse.json({ error: "Nome, email e senha sao obrigatorios" }, { status: 400 });
     }
@@ -36,9 +44,38 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Email ja cadastrado" }, { status: 409 });
     }
     const hash = await bcrypt.hash(password, 12);
+
+    let finalEmpresaId = role === "CLIENTE" ? empresaId : (empresaId === "none" ? null : empresaId);
+
+    // Se for CLIENTE, forcar a empresa "Hospitalar"
+    if (role === "CLIENTE") {
+      let hospitalar = await prisma.empresa.findFirst({
+        where: { nome: { equals: "Hospitalar", mode: "insensitive" } },
+      });
+      if (!hospitalar) {
+        hospitalar = await prisma.empresa.create({
+          data: { nome: "Hospitalar" },
+        });
+      }
+      finalEmpresaId = hospitalar.id;
+    }
+
     const user = await prisma.user.create({
-      data: { name, email, password: hash, role: role || "USER" },
-      select: { id: true, name: true, email: true, role: true, createdAt: true },
+      data: {
+        name,
+        email,
+        password: hash,
+        role: role || "USER",
+        empresaId: finalEmpresaId,
+      },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        createdAt: true,
+        empresa: { select: { nome: true } },
+      },
     });
     return NextResponse.json(user, { status: 201 });
   } catch (error) {

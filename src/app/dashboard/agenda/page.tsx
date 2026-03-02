@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useSession } from "next-auth/react";
 import { Topbar } from "@/components/dashboard/topbar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -39,6 +40,8 @@ import {
   CheckCircle,
   XCircle,
   Filter,
+  Check,
+  X,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -83,6 +86,7 @@ const tipoLabels: Record<string, string> = {
 };
 
 const statusConfig: Record<string, { label: string; className: string }> = {
+  SOLICITADA: { label: "Solicitada", className: "bg-amber-100 text-amber-700 border-amber-200" },
   AGENDADA: { label: "Agendada", className: "bg-blue-100 text-blue-700 border-blue-200" },
   REALIZADA: { label: "Realizada", className: "bg-green-100 text-green-700 border-green-200" },
   CANCELADA: { label: "Cancelada", className: "bg-red-100 text-red-700 border-red-200" },
@@ -147,17 +151,21 @@ function calcularHorasBlitz(horaEntrada?: string, horaSaida?: string) {
 function toDateInput(iso: string) {
   return iso ? iso.split("T")[0] : "";
 }
+
 function FormFields({
   form,
   setForm,
   profissionais,
+  isCliente,
+  canManage,
 }: {
   form: typeof emptyForm;
   setForm: (f: typeof emptyForm) => void;
   profissionais: Profissional[];
+  isCliente: boolean;
+  canManage: boolean;
 }) {
   const cidadeFixa = isCidadeValorFixo(form.cidade);
-  const valorTransporte = normalizeCity(form.cidade) === "londrina" ? "R$ 20,00" : "R$ 35,00";
 
   return (
     <div className="space-y-3">
@@ -198,7 +206,7 @@ function FormFields({
         <Input
           value={form.empresa}
           onChange={(e) => setForm({ ...form, empresa: e.target.value })}
-          placeholder="Nome da empresa"
+          placeholder="Nome da empresa atendida"
         />
       </div>
 
@@ -227,11 +235,6 @@ function FormFields({
           }}
           placeholder="Cidade"
         />
-        {cidadeFixa && (
-          <p className="text-xs text-muted-foreground mt-1">
-            Transporte fixo automatico para {form.cidade}: {valorTransporte}. Nao precisa preencher KM.
-          </p>
-        )}
       </div>
 
       <div>
@@ -243,7 +246,7 @@ function FormFields({
         />
       </div>
 
-      <div className="grid grid-cols-2 gap-3">
+      <div className={isCliente ? "grid grid-cols-1" : "grid grid-cols-2 gap-3"}>
         <div>
           <Label>Colaboradores</Label>
           <Input
@@ -253,53 +256,45 @@ function FormFields({
             onChange={(e) => setForm({ ...form, colaboradores: parseInt(e.target.value, 10) || 0 })}
           />
         </div>
-        <div>
-          <Label>Profissional</Label>
-          <Select
-            value={form.profissionalId || "none"}
-            onValueChange={(v) => setForm({ ...form, profissionalId: v === "none" ? "" : v })}
-          >
-            <SelectTrigger><SelectValue placeholder="Selecione..." /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="none">Nenhum</SelectItem>
-              {profissionais.map((p) => (
-                <SelectItem key={p.id} value={p.id}>{p.nome}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+        {!isCliente && (
+          <div>
+            <Label>Profissional</Label>
+            <Select
+              value={form.profissionalId || "none"}
+              onValueChange={(v) => setForm({ ...form, profissionalId: v === "none" ? "" : v })}
+            >
+              <SelectTrigger><SelectValue placeholder="Selecione..." /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">Nenhum</SelectItem>
+                {profissionais.map((p) => (
+                  <SelectItem key={p.id} value={p.id}>{p.nome}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
       </div>
 
-      <div>
-        <Label>Segundo Profissional</Label>
-        <Select
-          value={form.profissional2Id || "none"}
-          onValueChange={(v) => setForm({ ...form, profissional2Id: v === "none" ? "" : v })}
-        >
-          <SelectTrigger><SelectValue placeholder="Opcional" /></SelectTrigger>
-          <SelectContent>
-            <SelectItem value="none">Nenhum</SelectItem>
-            {profissionais
-              .filter((p) => p.id !== form.profissionalId)
-              .map((p) => (
-                <SelectItem key={p.id} value={p.id}>{p.nome}</SelectItem>
-              ))}
-          </SelectContent>
-        </Select>
-      </div>
-
-      {form.tipo === "BLITZ" && (
-        <div>
-          <Label>Horas da Blitz (calculadas)</Label>
-          <Input
-            type="text"
-            value={form.blitzHoras}
-            readOnly
-          />
-          <p className="text-xs text-muted-foreground mt-1">
-            Horas calculadas automaticamente pelos horarios de entrada e saida.
-          </p>
-        </div>
+      {!isCliente && (
+        <>
+          <div>
+            <Label>Segundo Profissional</Label>
+            <Select
+              value={form.profissional2Id || "none"}
+              onValueChange={(v) => setForm({ ...form, profissional2Id: v === "none" ? "" : v })}
+            >
+              <SelectTrigger><SelectValue placeholder="Opcional" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">Nenhum</SelectItem>
+                {profissionais
+                  .filter((p) => p.id !== form.profissionalId)
+                  .map((p) => (
+                    <SelectItem key={p.id} value={p.id}>{p.nome}</SelectItem>
+                  ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </>
       )}
 
       {(form.tipo === "BLITZ" || form.tipo === "PALESTRA") && (
@@ -341,80 +336,64 @@ function FormFields({
         </div>
       )}
 
-      {form.tipo === "PALESTRA" && (
-        <div>
-          <Label>Quantidade de palestras</Label>
-          <Input
-            type="number"
-            min={1}
-            value={form.qtdPalestras}
-            onChange={(e) =>
-              setForm({
-                ...form,
-                qtdPalestras: Math.max(1, parseInt(e.target.value, 10) || 1),
-              })
-            }
-          />
+      {!isCliente && (
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <Label>Ajuda de Custo</Label>
+            <Select
+              value={form.ajudaCusto ? "SIM" : "NAO"}
+              onValueChange={(v) => setForm({ ...form, ajudaCusto: v === "SIM" })}
+            >
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="NAO">Nao</SelectItem>
+                <SelectItem value="SIM">Sim (+ R$ 35,00)</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div>
+            <Label>Transporte</Label>
+            <Select
+              value={form.transporte || "none"}
+              onValueChange={(v) =>
+                setForm({
+                  ...form,
+                  transporte: v === "none" ? "" : (v as "MOTORISTA" | "CARRO_PROPRIO"),
+                })
+              }
+              disabled={cidadeFixa && !canManage}
+            >
+              <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">Nao informado</SelectItem>
+                <SelectItem value="MOTORISTA">Motorista</SelectItem>
+                <SelectItem value="CARRO_PROPRIO">Carro proprio</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </div>
       )}
 
-      <div className="grid grid-cols-2 gap-3">
-        <div>
-          <Label>Ajuda de Custo</Label>
-          <Select
-            value={form.ajudaCusto ? "SIM" : "NAO"}
-            onValueChange={(v) => setForm({ ...form, ajudaCusto: v === "SIM" })}
-          >
-            <SelectTrigger><SelectValue /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="NAO">Nao</SelectItem>
-              <SelectItem value="SIM">Sim (+ R$ 35,00)</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-        <div>
-          <Label>Transporte</Label>
-          <Select
-            value={form.transporte || "none"}
-            onValueChange={(v) =>
-              setForm({
-                ...form,
-                transporte: v === "none" ? "" : (v as "MOTORISTA" | "CARRO_PROPRIO"),
-              })
-            }
-            disabled={cidadeFixa}
-          >
-            <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="none">Nao informado</SelectItem>
-              <SelectItem value="MOTORISTA">Motorista</SelectItem>
-              <SelectItem value="CARRO_PROPRIO">Carro proprio</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
-
-      {form.transporte === "CARRO_PROPRIO" && !cidadeFixa && (
-        <div>
+      {!isCliente && form.transporte === "CARRO_PROPRIO" && (
+        <div className="animate-in fade-in slide-in-from-top-1">
           <Label>KM Rodado</Label>
           <Input
             type="number"
             min={0}
             step="0.1"
-            value={form.kmRodado}
-            onChange={(e) =>
-              setForm({ ...form, kmRodado: parseFloat(e.target.value) || 0 })
-            }
+            value={form.kmRodado || ""}
+            onChange={(e) => setForm({ ...form, kmRodado: parseFloat(e.target.value) || 0 })}
+            placeholder="Quantidade de quilômetros"
           />
         </div>
       )}
 
       <div>
-        <Label>Materiais</Label>
+        <Label>Materiais / Observacoes</Label>
         <Textarea
           value={form.materiais}
           onChange={(e) => setForm({ ...form, materiais: e.target.value })}
-          placeholder="Lista de materiais necessarios"
+          placeholder="Lista de materiais ou detalhes da solicitacao"
           rows={2}
         />
       </div>
@@ -423,6 +402,7 @@ function FormFields({
 }
 
 export default function AgendaPage() {
+  const { data: session } = useSession();
   const [atividades, setAtividades] = useState<Atividade[]>([]);
   const [profissionais, setProfissionais] = useState<Profissional[]>([]);
   const [loading, setLoading] = useState(false);
@@ -433,6 +413,10 @@ export default function AgendaPage() {
   const [editOpen, setEditOpen] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState({ ...emptyForm });
+
+  const role = (session?.user as any)?.role;
+  const isCliente = role === "CLIENTE";
+  const canManage = role === "ADMIN" || role === "TECNICO";
 
   useEffect(() => {
     fetchAtividades();
@@ -463,10 +447,13 @@ export default function AgendaPage() {
       const res = await fetch("/api/agenda", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify({
+          ...form,
+          status: isCliente ? "SOLICITADA" : "AGENDADA"
+        }),
       });
       if (res.ok) {
-        toast.success("Atividade agendada!");
+        toast.success(isCliente ? "Solicitacao enviada!" : "Atividade agendada!");
         setForm({ ...emptyForm });
         fetchAtividades();
       } else {
@@ -567,6 +554,7 @@ export default function AgendaPage() {
       : atividades.filter((a) => a.status === filterStatus);
 
   const counts = {
+    SOLICITADA: atividades.filter((a) => a.status === "SOLICITADA").length,
     AGENDADA: atividades.filter((a) => a.status === "AGENDADA").length,
     REALIZADA: atividades.filter((a) => a.status === "REALIZADA").length,
     CANCELADA: atividades.filter((a) => a.status === "CANCELADA").length,
@@ -574,14 +562,14 @@ export default function AgendaPage() {
 
   return (
     <>
-      <Topbar title="Agenda" description="Gerencie atividades e compromissos" />
+      <Topbar title="Agenda" description={isCliente ? "Solicite seus atendimentos" : "Gerencie atividades e compromissos"} />
 
       <div className="p-6 grid gap-6 lg:grid-cols-[380px_1fr]">
         <Card className="h-fit sticky top-6">
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center gap-2 text-lg">
               <Plus className="h-5 w-5 text-[#1e3a8a]" />
-              Nova Atividade
+              {isCliente ? "Solicitar Atendimento" : "Nova Atividade"}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -590,6 +578,8 @@ export default function AgendaPage() {
                 form={form}
                 setForm={setForm}
                 profissionais={profissionais}
+                isCliente={isCliente}
+                canManage={canManage}
               />
               <Button
                 type="submit"
@@ -601,7 +591,7 @@ export default function AgendaPage() {
                 ) : (
                   <CalendarDays className="h-4 w-4 mr-2" />
                 )}
-                Agendar
+                {isCliente ? "Enviar Solicitacao" : "Agendar"}
               </Button>
             </form>
           </CardContent>
@@ -612,12 +602,12 @@ export default function AgendaPage() {
             <div className="flex items-center justify-between flex-wrap gap-3">
               <CardTitle className="flex items-center gap-2 text-lg">
                 <CalendarDays className="h-5 w-5 text-[#1e3a8a]" />
-                Compromissos ({filtered.length})
+                {isCliente ? "Minhas Solicitacoes" : "Compromissos"} ({filtered.length})
               </CardTitle>
 
               <div className="flex items-center gap-2 flex-wrap">
                 <Filter className="h-4 w-4 text-muted-foreground" />
-                {(["TODOS", "AGENDADA", "REALIZADA", "CANCELADA"] as const).map((s) => (
+                {(["TODOS", "SOLICITADA", "AGENDADA", "REALIZADA", "CANCELADA"] as const).map((s) => (
                   <button
                     type="button"
                     key={s}
@@ -630,7 +620,7 @@ export default function AgendaPage() {
                   >
                     {s === "TODOS"
                       ? `Todos (${atividades.length})`
-                      : `${statusConfig[s].label} (${counts[s]})`}
+                      : `${statusConfig[s]?.label} (${counts[s]})`}
                   </button>
                 ))}
               </div>
@@ -651,10 +641,11 @@ export default function AgendaPage() {
                       <TableHead>Data</TableHead>
                       <TableHead>Tipo</TableHead>
                       <TableHead>Empresa</TableHead>
+                      <TableHead>Colab.</TableHead>
                       <TableHead>Cidade</TableHead>
                       <TableHead>Profissionais</TableHead>
                       <TableHead>Status</TableHead>
-                      <TableHead className="text-right">Acoes</TableHead>
+                      {!isCliente && <TableHead className="text-right">Acoes</TableHead>}
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -671,6 +662,7 @@ export default function AgendaPage() {
                           </Badge>
                         </TableCell>
                         <TableCell className="text-sm">{ativ.empresa.nome}</TableCell>
+                        <TableCell className="text-sm">{ativ.colaboradores || 0}</TableCell>
                         <TableCell className="text-sm">{ativ.cidade || "-"}</TableCell>
                         <TableCell className="text-sm">
                           {ativ.profissional?.nome || "-"}
@@ -681,50 +673,80 @@ export default function AgendaPage() {
                             {statusConfig[ativ.status]?.label}
                           </Badge>
                         </TableCell>
-                        <TableCell>
-                          <div className="flex justify-end gap-1">
-                            {ativ.status === "AGENDADA" && (
-                              <>
-                                <Button
-                                  size="sm"
-                                  variant="ghost"
-                                  className="h-7 w-7 p-0 text-green-600 hover:bg-green-50"
-                                  title="Marcar como Realizada"
-                                  onClick={() => updateStatus(ativ.id, "REALIZADA")}
-                                >
-                                  <CheckCircle className="h-4 w-4" />
-                                </Button>
-                                <Button
-                                  size="sm"
-                                  variant="ghost"
-                                  className="h-7 w-7 p-0 text-orange-500 hover:bg-orange-50"
-                                  title="Cancelar"
-                                  onClick={() => updateStatus(ativ.id, "CANCELADA")}
-                                >
-                                  <XCircle className="h-4 w-4" />
-                                </Button>
-                              </>
-                            )}
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              className="h-7 w-7 p-0 text-[#1e3a8a] hover:bg-blue-50"
-                              title="Editar"
-                              onClick={() => openEdit(ativ)}
-                            >
-                              <Pencil className="h-3.5 w-3.5" />
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              className="h-7 w-7 p-0 text-red-500 hover:bg-red-50"
-                              title="Excluir"
-                              onClick={() => handleDelete(ativ.id)}
-                            >
-                              <Trash2 className="h-3.5 w-3.5" />
-                            </Button>
-                          </div>
-                        </TableCell>
+                        {!isCliente && (
+                          <TableCell>
+                            <div className="flex justify-end gap-1">
+                              {canManage && ativ.status === "SOLICITADA" && (
+                                <>
+                                  <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    className="h-7 w-7 p-0 text-green-600 hover:bg-green-50"
+                                    title="Aprovar Agendamento"
+                                    onClick={() => updateStatus(ativ.id, "AGENDADA")}
+                                  >
+                                    <Check className="h-4 w-4" />
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    className="h-7 w-7 p-0 text-red-500 hover:bg-red-50"
+                                    title="Recusar"
+                                    onClick={() => updateStatus(ativ.id, "CANCELADA")}
+                                  >
+                                    <X className="h-4 w-4" />
+                                  </Button>
+                                </>
+                              )}
+                              
+                              {canManage && ativ.status === "AGENDADA" && (
+                                <>
+                                  <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    className="h-7 w-7 p-0 text-green-600 hover:bg-green-50"
+                                    title="Marcar como Realizada"
+                                    onClick={() => updateStatus(ativ.id, "REALIZADA")}
+                                  >
+                                    <CheckCircle className="h-4 w-4" />
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    className="h-7 w-7 p-0 text-orange-500 hover:bg-orange-50"
+                                    title="Cancelar"
+                                    onClick={() => updateStatus(ativ.id, "CANCELADA")}
+                                  >
+                                    <XCircle className="h-4 w-4" />
+                                  </Button>
+                                </>
+                              )}
+                              
+                              {canManage && (
+                                <>
+                                  <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    className="h-7 w-7 p-0 text-[#1e3a8a] hover:bg-blue-50"
+                                    title="Editar"
+                                    onClick={() => openEdit(ativ)}
+                                  >
+                                    <Pencil className="h-3.5 w-3.5" />
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    className="h-7 w-7 p-0 text-red-500 hover:bg-red-50"
+                                    title="Excluir"
+                                    onClick={() => handleDelete(ativ.id)}
+                                  >
+                                    <Trash2 className="h-3.5 w-3.5" />
+                                  </Button>
+                                </>
+                              )}
+                            </div>
+                          </TableCell>
+                        )}
                       </TableRow>
                     ))}
                   </TableBody>
@@ -748,6 +770,8 @@ export default function AgendaPage() {
             form={editForm}
             setForm={setEditForm}
             profissionais={profissionais}
+            isCliente={isCliente}
+            canManage={canManage}
           />
 
           <div>
@@ -755,11 +779,13 @@ export default function AgendaPage() {
             <Select
               value={editForm.status}
               onValueChange={(v) => setEditForm({ ...editForm, status: v })}
+              disabled={isCliente}
             >
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
+                <SelectItem value="SOLICITADA">Solicitada</SelectItem>
                 <SelectItem value="AGENDADA">Agendada</SelectItem>
                 <SelectItem value="REALIZADA">Realizada</SelectItem>
                 <SelectItem value="CANCELADA">Cancelada</SelectItem>

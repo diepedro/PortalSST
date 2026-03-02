@@ -1,6 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import { Topbar } from "@/components/dashboard/topbar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -51,11 +53,15 @@ function money(value: number) {
 }
 
 export default function FinanceiroPage() {
+  const { data: session, status } = useSession();
+  const router = useRouter();
   const [dataInicial, setDataInicial] = useState(firstDayOfMonth());
   const [dataFinal, setDataFinal] = useState(today());
   const [loading, setLoading] = useState(false);
   const [loadingPdfId, setLoadingPdfId] = useState<string | null>(null);
   const [folha, setFolha] = useState<FolhaProfissional[]>([]);
+
+  const isAdmin = (session?.user as any)?.role === "ADMIN";
 
   const fetchFolha = useCallback(async function fetchFolha() {
     if (!dataInicial || !dataFinal) {
@@ -84,6 +90,16 @@ export default function FinanceiroPage() {
     }
   }, [dataInicial, dataFinal]);
 
+  useEffect(() => {
+    if (status === "unauthenticated") {
+      router.replace("/login");
+    } else if (status === "authenticated" && !isAdmin) {
+      router.replace("/dashboard");
+    } else if (status === "authenticated" && isAdmin) {
+      fetchFolha();
+    }
+  }, [status, isAdmin, router, fetchFolha]);
+
   async function handleGerarPdf(profissionalId: string) {
     if (!dataInicial || !dataFinal) {
       toast.error("Informe data inicial e final");
@@ -102,14 +118,18 @@ export default function FinanceiroPage() {
     }
   }
 
-  useEffect(() => {
-    fetchFolha();
-  }, [fetchFolha]);
-
   const totalGeral = useMemo(
     () => folha.reduce((acc, prof) => acc + prof.total, 0),
     [folha]
   );
+
+  if (status === "loading" || !isAdmin) {
+    return (
+      <div className="p-6 flex items-center justify-center min-h-screen">
+        <Loader2 className="h-8 w-8 animate-spin text-[#1e3a8a]" />
+      </div>
+    );
+  }
 
   return (
     <>

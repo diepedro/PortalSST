@@ -20,27 +20,29 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 
 const navItems = [
-  { href: "/dashboard", label: "Painel", icon: LayoutDashboard },
-  { href: "/dashboard/relatorios", label: "Relatorios", icon: FileBarChart },
-  { href: "/dashboard/agenda", label: "Agenda", icon: CalendarDays },
-  { href: "/dashboard/profissionais", label: "Profissionais", icon: Users },
-  { href: "/dashboard/financeiro", label: "Financeiro", icon: Wallet },
-  { href: "/dashboard/arquivos", label: "Arquivos", icon: FolderOpen },
+  { href: "/dashboard", label: "Painel", icon: LayoutDashboard, roles: ["ADMIN", "TECNICO", "USER"] },
+  { href: "/dashboard/relatorios", label: "Relatórios", icon: FileBarChart, roles: ["ADMIN", "TECNICO", "USER"] },
+  { href: "/dashboard/agenda", label: "Agenda", icon: CalendarDays, roles: ["ADMIN", "TECNICO", "USER", "CLIENTE"] },
+  { href: "/dashboard/profissionais", label: "Profissionais", icon: Users, roles: ["ADMIN", "TECNICO"] },
+  { href: "/dashboard/financeiro", label: "Financeiro", icon: Wallet, roles: ["ADMIN"] },
+  { href: "/dashboard/arquivos", label: "Arquivos", icon: FolderOpen, roles: ["ADMIN", "TECNICO"] },
 ];
 
 const adminItems = [
-  { href: "/dashboard/usuarios", label: "Usuarios", icon: UserCog },
+  { href: "/dashboard/usuarios", label: "Usuários", icon: UserCog, roles: ["ADMIN"] },
 ];
 
 export function Sidebar() {
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
   const { data: session } = useSession();
-  const isAdmin = (session?.user as { role?: string })?.role === "ADMIN";
+  const userRole = (session?.user as any)?.role || "USER";
+
+  const filteredNavItems = navItems.filter(item => item.roles.includes(userRole));
+  const filteredAdminItems = adminItems.filter(item => item.roles.includes(userRole));
 
   return (
     <>
-      {/* Mobile toggle */}
       <Button
         variant="ghost"
         size="icon"
@@ -57,7 +59,6 @@ export function Sidebar() {
           "max-lg:hidden lg:flex"
         )}
       >
-        {/* Logo */}
         <div className="flex items-center justify-between p-4 border-b border-white/10">
           {!collapsed && (
             <div className="rounded-md border border-white/20 bg-white/10 px-4 py-3 text-sm font-semibold tracking-wide text-white">
@@ -78,9 +79,8 @@ export function Sidebar() {
           </Button>
         </div>
 
-        {/* Navigation */}
         <nav className="flex-1 py-4 space-y-1 px-3 overflow-y-auto">
-          {navItems.map((item) => {
+          {filteredNavItems.map((item) => {
             const isActive =
               pathname === item.href ||
               (item.href !== "/dashboard" && pathname.startsWith(item.href));
@@ -105,16 +105,15 @@ export function Sidebar() {
             );
           })}
 
-          {/* Admin-only section */}
-          {isAdmin && (
+          {filteredAdminItems.length > 0 && (
             <>
               {!collapsed && (
                 <p className="text-white/30 text-xs uppercase tracking-wider px-3 pt-4 pb-1">
-                  Administracao
+                  Administração
                 </p>
               )}
               {collapsed && <div className="border-t border-white/10 my-2" />}
-              {adminItems.map((item) => {
+              {filteredAdminItems.map((item) => {
                 const isActive = pathname.startsWith(item.href);
                 return (
                   <Link
@@ -140,7 +139,6 @@ export function Sidebar() {
           )}
         </nav>
 
-        {/* Footer */}
         <div className="p-3 border-t border-white/10">
           <button
             onClick={() => signOut({ callbackUrl: "/login" })}

@@ -27,7 +27,13 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         );
         if (!valid) return null;
 
-        return { id: user.id, name: user.name, email: user.email, role: user.role };
+        return {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          role: user.role,
+          empresaId: user.empresaId,
+        };
       },
     }),
   ],
@@ -36,13 +42,15 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       if (user) {
         token.role = (user as { role: string }).role;
         token.id = user.id;
+        token.empresaId = (user as any).empresaId;
       }
       return token;
     },
     async session({ session, token }) {
       if (session.user) {
         session.user.id = token.id as string;
-        (session.user as unknown as { role: string }).role = token.role as string;
+        (session.user as any).role = token.role as string;
+        (session.user as any).empresaId = token.empresaId as string;
       }
       return session;
     },

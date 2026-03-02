@@ -55,10 +55,6 @@ export default function RelatoriosPage() {
   }
 
   async function handleGenerate() {
-    if (tipoRelatorio === "NPS") {
-      toast.info("Essa automacao sera habilitada em breve");
-      return;
-    }
     if (!file) return;
     setLoading(true);
 
@@ -75,16 +71,15 @@ export default function RelatoriosPage() {
       const data = await res.json();
 
       if (res.ok) {
-        toast.success("Relatorio gerado com sucesso!");
+        toast.success("Relatório gerado com sucesso!");
         setFile(null);
         fetchRelatorios();
 
-        // Auto-download
         if (data.downloadUrl) {
           window.open(data.downloadUrl, "_blank");
         }
       } else {
-        toast.error(data.error || "Erro ao gerar relatorio");
+        toast.error(data.error || "Erro ao gerar relatório");
       }
     } catch {
       toast.error("Erro ao processar arquivo");
@@ -94,52 +89,44 @@ export default function RelatoriosPage() {
   }
 
   async function handleDelete(id: string) {
-    if (!confirm("Tem certeza que deseja excluir este relatorio?")) return;
+    if (!confirm("Tem certeza que deseja excluir este relatório?")) return;
     try {
       const res = await fetch(`/api/relatorios/${id}`, { method: "DELETE" });
       if (res.ok) {
-        toast.success("Relatorio excluido com sucesso!");
+        toast.success("Relatório excluído com sucesso!");
         fetchRelatorios();
       } else {
-        toast.error("Erro ao excluir relatorio");
+        toast.error("Erro ao excluir relatório");
       }
     } catch {
-      toast.error("Erro ao excluir relatorio");
+      toast.error("Erro ao excluir relatório");
     }
   }
 
   function handleDrop(e: React.DragEvent) {
     e.preventDefault();
     setDragOver(false);
-    if (tipoRelatorio === "NPS") {
-      toast.info("Selecione Saude ou Comparativo para gerar PDF");
-      return;
-    }
     const droppedFile = e.dataTransfer.files[0];
-    if (
-      droppedFile &&
-      droppedFile.name.endsWith(".xlsx")
-    ) {
+    if (droppedFile && droppedFile.name.endsWith(".xlsx")) {
       setFile(droppedFile);
     } else {
-      toast.error("Apenas arquivos .xlsx sao aceitos");
+      toast.error("Apenas arquivos .xlsx são aceitos");
     }
   }
 
   return (
     <>
       <Topbar
-        title="Relatorios"
-        description="Gere relatorios de saude e prepare comparativo/NPS"
+        title="Relatórios"
+        description="Gere relatórios de saúde, comparativos e NPS"
       />
 
       <div className="p-6 grid gap-6 lg:grid-cols-[400px_1fr]">
-        {/* Upload Panel */}
         <Card className="h-fit">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-lg">
               <FileBarChart className="h-5 w-5 text-[#1e3a8a]" />
-              Gerar Relatorio
+              Gerar Relatório
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -153,7 +140,7 @@ export default function RelatoriosPage() {
                   setFile(null);
                 }}
               >
-                Saude
+                Saúde
               </Button>
               <Button
                 type="button"
@@ -179,13 +166,6 @@ export default function RelatoriosPage() {
               </Button>
             </div>
 
-            {tipoRelatorio === "NPS" && (
-              <div className="rounded-md border border-amber-200 bg-amber-50 p-3 text-xs text-amber-700">
-                Relatorio NPS pronto para uso futuro. A automacao sera adicionada na proxima etapa.
-              </div>
-            )}
-
-            {/* Drop zone */}
             <div
               className={`border-2 border-dashed rounded-xl p-8 text-center transition-all cursor-pointer ${
                 dragOver
@@ -200,17 +180,13 @@ export default function RelatoriosPage() {
               }}
               onDragLeave={() => setDragOver(false)}
               onDrop={handleDrop}
-              onClick={() =>
-                tipoRelatorio !== "NPS" &&
-                document.getElementById("excel-upload")?.click()
-              }
+              onClick={() => document.getElementById("excel-upload")?.click()}
             >
               <input
                 id="excel-upload"
                 type="file"
                 accept=".xlsx"
                 className="hidden"
-                disabled={tipoRelatorio === "NPS"}
                 onChange={(e) => {
                   const f = e.target.files?.[0];
                   if (f) setFile(f);
@@ -228,14 +204,10 @@ export default function RelatoriosPage() {
                 <div className="space-y-2">
                   <Upload className="h-10 w-10 mx-auto text-gray-400" />
                   <p className="font-medium text-sm text-gray-600">
-                    {tipoRelatorio !== "NPS"
-                      ? "Arraste o arquivo Excel aqui"
-                      : "Automacao em desenvolvimento"}
+                    Arraste o arquivo Excel aqui
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    {tipoRelatorio !== "NPS"
-                      ? "ou clique para selecionar (.xlsx)"
-                      : "Selecione Saude ou Comparativo para gerar agora"}
+                    ou clique para selecionar (.xlsx)
                   </p>
                 </div>
               )}
@@ -244,7 +216,7 @@ export default function RelatoriosPage() {
             <Button
               className="w-full bg-[#1e3a8a] hover:bg-[#22c55e] transition-all"
               onClick={handleGenerate}
-              disabled={tipoRelatorio === "NPS" || !file || loading}
+              disabled={!file || loading}
             >
               {loading ? (
                 <>
@@ -254,7 +226,7 @@ export default function RelatoriosPage() {
               ) : (
                 <>
                   <FileBarChart className="h-4 w-4 mr-2" />
-                  {tipoRelatorio === "SAUDE" ? "Gerar Relatorio de Saude" : tipoRelatorio === "COMPARATIVO" ? "Gerar Relatorio Comparativo" : "Automacao em breve"}
+                  {tipoRelatorio === "SAUDE" ? "Gerar Relatório de Saúde" : tipoRelatorio === "COMPARATIVO" ? "Gerar Relatório Comparativo" : "Gerar Relatório NPS"}
                 </>
               )}
             </Button>
@@ -271,12 +243,11 @@ export default function RelatoriosPage() {
           </CardContent>
         </Card>
 
-        {/* Reports History */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-lg">
               <FileSpreadsheet className="h-5 w-5 text-[#1e3a8a]" />
-              Historico de Relatorios
+              Histórico de Relatórios
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -284,10 +255,7 @@ export default function RelatoriosPage() {
               <div className="text-center py-12">
                 <AlertCircle className="h-12 w-12 mx-auto text-gray-300 mb-3" />
                 <p className="text-muted-foreground">
-                  Nenhum relatorio gerado ainda
-                </p>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Faca upload de um arquivo Excel para comecar
+                  Nenhum relatório gerado ainda
                 </p>
               </div>
             ) : (
@@ -297,7 +265,7 @@ export default function RelatoriosPage() {
                     <TableHead>Empresa</TableHead>
                     <TableHead>Data da Coleta</TableHead>
                     <TableHead>Gerado em</TableHead>
-                    <TableHead className="text-right">Acao</TableHead>
+                    <TableHead className="text-right">Ação</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -327,7 +295,7 @@ export default function RelatoriosPage() {
                           className="gap-1"
                           onClick={() =>
                             window.open(
-                              `/api/relatorios/${rel.id}/download`,
+                              `/api/relatorios/${rel.id}/pdf`,
                               "_blank"
                             )
                           }

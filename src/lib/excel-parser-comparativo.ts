@@ -1,5 +1,6 @@
 import ExcelJS from "exceljs";
 import { CategoriaComparativa, DadosRelatorioComparativo } from "@/types";
+import { DadosRelatorioComparativoSchema } from "./validation";
 
 function unwrap(val: unknown): unknown {
   if (val === null || val === undefined) return null;
@@ -105,8 +106,8 @@ export async function parseExcelComparativo(
     buildCategoria("> 110", cell("C33"), cell("D33"), cell("G33"), cell("H33")),
   ];
 
-  return {
-    tipo: "COMPARATIVO",
+  const finalData = {
+    tipo: "COMPARATIVO" as const,
     empresa,
     idade,
     genero,
@@ -114,5 +115,12 @@ export async function parseExcelComparativo(
     pressaoArterial,
     glicemiaCapilar,
   };
-}
 
+  const result = DadosRelatorioComparativoSchema.safeParse(finalData);
+  if (!result.success) {
+    console.error("Erro na validação do Excel Comparativo:", result.error.format());
+    return finalData as DadosRelatorioComparativo;
+  }
+
+  return result.data as DadosRelatorioComparativo;
+}
