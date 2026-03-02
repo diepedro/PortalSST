@@ -8,6 +8,12 @@ import { DadosRelatorioAny, DadosRelatorioComparativo, DadosRelatorioNPS } from 
 import { auth } from "@/lib/auth";
 
 type TipoRelatorio = "SAUDE" | "COMPARATIVO" | "NPS";
+type SessionLike = {
+  user?: {
+    id?: string | null;
+    email?: string | null;
+  } | null;
+} | null;
 
 function parseDateOrNow(input: string): Date {
   if (!input) return new Date();
@@ -41,7 +47,7 @@ function getDataColeta(dados: DadosRelatorioAny): Date {
   return parseDateOrNow((dados as { empresa: { dataColeta: string } }).empresa.dataColeta);
 }
 
-async function resolveUsuarioIdFromSession(session: Awaited<ReturnType<typeof auth>>): Promise<string | null> {
+async function resolveUsuarioIdFromSession(session: SessionLike): Promise<string | null> {
   const sessionUserId = session?.user?.id;
   const sessionUserEmail = session?.user?.email;
 
