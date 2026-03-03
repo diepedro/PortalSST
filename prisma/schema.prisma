@@ -25,6 +25,7 @@ model User {
   createdAt  DateTime    @default(now()) @map("created_at")
   relatorios Relatorio[]
   atividades Atividade[]
+  movimentacoes StockMovement[]
 
   @@map("users")
 }
@@ -37,11 +38,10 @@ model Empresa {
   createdAt  DateTime    @default(now()) @map("created_at")
   relatorios Relatorio[]
   atividades Atividade[]
-  usuarios   User[]      // New relation
+  usuarios   User[]
 
   @@map("empresas")
 }
-
 
 model Profissional {
   id              String      @id @default(cuid())
@@ -101,8 +101,53 @@ model Atividade {
   materiais      String?
   status         StatusAtividade @default(AGENDADA)
   createdAt      DateTime        @default(now()) @map("created_at")
+  movimentacoes  StockMovement[]
 
   @@map("atividades")
+}
+
+model Product {
+  id          String         @id @default(cuid())
+  name        String
+  category    String
+  unit        String         // Unidade de Medida (ex: Unidade, ml, Caixa)
+  batches     StockBatch[]
+  createdAt   DateTime       @default(now()) @map("created_at")
+  updatedAt   DateTime       @updatedAt @map("updated_at")
+
+  @@map("products")
+}
+
+model StockBatch {
+  id               String          @id @default(cuid())
+  productId        String          @map("product_id")
+  product          Product         @relation(fields: [productId], references: [id])
+  batchNumber      String          @map("batch_number")
+  expirationDate   DateTime        @map("expiration_date")
+  initialQuantity  Float           @map("initial_quantity")
+  currentQuantity  Float           @map("current_quantity")
+  movements        StockMovement[]
+  createdAt        DateTime        @default(now()) @map("created_at")
+  updatedAt        DateTime        @updatedAt @map("updated_at")
+
+  @@map("stock_batches")
+}
+
+model StockMovement {
+  id           String       @id @default(cuid())
+  batchId      String       @map("batch_id")
+  batch        StockBatch   @relation(fields: [batchId], references: [id])
+  type         MovementType
+  quantity     Float
+  description  String?
+  atividadeId  String?      @map("atividade_id")
+  atividade    Atividade?   @relation(fields: [atividadeId], references: [id])
+  userId       String?      @map("user_id")
+  user         User?        @relation(fields: [userId], references: [id])
+  date         DateTime     @default(now())
+  createdAt    DateTime     @default(now()) @map("created_at")
+
+  @@map("stock_movements")
 }
 
 enum TipoAtividade {
@@ -121,6 +166,11 @@ enum StatusAtividade {
 enum Transporte {
   MOTORISTA
   CARRO_PROPRIO
+}
+
+enum MovementType {
+  ENTRADA
+  SAIDA
 }
 
 model Arquivo {

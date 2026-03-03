@@ -44,6 +44,7 @@ import {
   X,
 } from "lucide-react";
 import { toast } from "sonner";
+import { StockSelector, StockItem } from "@/components/dashboard/stock-selector";
 
 interface Atividade {
   id: string;
@@ -113,6 +114,7 @@ const emptyForm = {
   qtdPalestras: 1,
   kmRodado: 0,
   status: "AGENDADA",
+  stockItems: [] as StockItem[],
 };
 
 function normalizeCity(value?: string | null) {
@@ -397,6 +399,13 @@ function FormFields({
           rows={2}
         />
       </div>
+
+      {!isCliente && (
+        <StockSelector 
+          selectedItems={form.stockItems} 
+          onChange={(items) => setForm({ ...form, stockItems: items })} 
+        />
+      )}
     </div>
   );
 }
@@ -457,7 +466,8 @@ export default function AgendaPage() {
         setForm({ ...emptyForm });
         fetchAtividades();
       } else {
-        toast.error("Erro ao agendar");
+        const errorData = await res.json();
+        toast.error(errorData.error || "Erro ao agendar");
       }
     } catch {
       toast.error("Erro de conexao");
@@ -490,6 +500,7 @@ export default function AgendaPage() {
       qtdPalestras: ativ.qtdPalestras || 1,
       kmRodado: cidadeFixa ? 0 : (ativ.kmRodado || 0),
       status: ativ.status,
+      stockItems: [],
     });
     setEditOpen(true);
   }
@@ -512,7 +523,8 @@ export default function AgendaPage() {
         setEditOpen(false);
         fetchAtividades();
       } else {
-        toast.error("Erro ao salvar alteracoes");
+        const errorData = await res.json();
+        toast.error(errorData.error || "Erro ao salvar alteracoes");
       }
     } catch {
       toast.error("Erro de conexao");

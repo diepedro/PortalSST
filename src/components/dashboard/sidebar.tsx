@@ -14,6 +14,7 @@ import {
   ChevronLeft,
   Menu,
   UserCog,
+  Package,
 } from "lucide-react";
 import { signOut, useSession } from "next-auth/react";
 import { useState } from "react";
@@ -24,6 +25,7 @@ const navItems = [
   { href: "/dashboard/relatorios", label: "Relatórios", icon: FileBarChart, roles: ["ADMIN", "TECNICO", "USER"] },
   { href: "/dashboard/agenda", label: "Agenda", icon: CalendarDays, roles: ["ADMIN", "TECNICO", "USER", "CLIENTE"] },
   { href: "/dashboard/profissionais", label: "Profissionais", icon: Users, roles: ["ADMIN", "TECNICO"] },
+  { href: "/dashboard/estoque", label: "Estoque", icon: Package, roles: ["ADMIN", "TECNICO"] },
   { href: "/dashboard/financeiro", label: "Financeiro", icon: Wallet, roles: ["ADMIN"] },
   { href: "/dashboard/arquivos", label: "Arquivos", icon: FolderOpen, roles: ["ADMIN", "TECNICO"] },
 ];
