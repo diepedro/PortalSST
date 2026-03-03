@@ -33,15 +33,14 @@ npm run dev
 
 ## Docker
 ```bash
-docker-compose up -d
-docker-compose exec app npx tsx prisma/seed.ts
+docker compose up -d --build
 ```
 
 ### Docker + Cloudflare Tunnel
 Use um token de tunnel ja criado no Cloudflare:
 ```bash
 set CLOUDFLARE_TUNNEL_TOKEN=SEU_TOKEN_AQUI
-docker compose up -d --build
+docker compose --profile tunnel up -d --build
 docker compose logs -f cloudflared
 ```
 

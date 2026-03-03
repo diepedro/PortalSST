@@ -38,7 +38,7 @@ COPY --from=builder /app/.next/static ./.next/static
 
 # Entrypoint
 COPY --from=builder /app/docker-entrypoint.sh ./docker-entrypoint.sh
-RUN chmod +x docker-entrypoint.sh
+RUN sed -i 's/\r$//' docker-entrypoint.sh && chmod +x docker-entrypoint.sh
 
 RUN mkdir -p uploads/relatorios uploads/arquivos
 

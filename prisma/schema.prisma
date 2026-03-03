@@ -12,6 +12,7 @@ enum Role {
   TECNICO
   USER
   CLIENTE
+  COLETA
 }
 
 model User {
@@ -25,6 +26,7 @@ model User {
   createdAt  DateTime    @default(now()) @map("created_at")
   relatorios Relatorio[]
   atividades Atividade[]
+  planilhas  Planilha[]
 
   @@map("users")
 }
@@ -132,4 +134,20 @@ model Arquivo {
   createdAt DateTime @default(now()) @map("created_at")
 
   @@map("arquivos")
+}
+
+model Planilha {
+  id              String   @id @default(cuid())
+  nome            String
+  tipo            String
+  tamanho         Int
+  arquivoPath     String   @map("arquivo_path")
+  empresaNome     String?  @map("empresa_nome")
+  dataColetaTexto String?  @map("data_coleta_texto")
+  usuarioId       String?  @map("usuario_id")
+  usuario         User?    @relation(fields: [usuarioId], references: [id])
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  @@map("planilhas")
 }

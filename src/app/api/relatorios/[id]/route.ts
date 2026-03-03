@@ -14,6 +14,9 @@ export async function GET(
   let { id } = await context.params;
   if (id.endsWith(".pdf")) id = id.slice(0, -4);
   const role = (session.user as any).role;
+  if (role === "COLETA") {
+    return NextResponse.json({ error: "Permissao insuficiente" }, { status: 403 });
+  }
 
   const relatorio = await prisma.relatorio.findUnique({
     where: { id },
@@ -47,6 +50,9 @@ export async function DELETE(
   let { id } = await context.params;
   if (id.endsWith(".pdf")) id = id.slice(0, -4);
   const role = (session.user as any).role;
+  if (role === "COLETA") {
+    return NextResponse.json({ error: "Permissao insuficiente" }, { status: 403 });
+  }
 
   const relatorio = await prisma.relatorio.findUnique({ where: { id } });
   if (!relatorio) {
@@ -61,3 +67,5 @@ export async function DELETE(
   await prisma.relatorio.delete({ where: { id } });
   return NextResponse.json({ success: true });
 }
+
+

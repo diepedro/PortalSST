@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { auth } from "@/lib/auth";
 import path from "path";
 import fs from "fs";
 
@@ -7,6 +8,14 @@ export async function GET(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const session = await auth();
+  if (!session?.user) {
+    return NextResponse.json({ error: "Nao autenticado" }, { status: 401 });
+  }
+  if ((session.user as any).role === "COLETA") {
+    return NextResponse.json({ error: "Permissao insuficiente" }, { status: 403 });
+  }
+
   const { id } = await params;
 
   const arquivo = await prisma.arquivo.findUnique({ where: { id } });
@@ -32,6 +41,14 @@ export async function DELETE(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const session = await auth();
+  if (!session?.user) {
+    return NextResponse.json({ error: "Nao autenticado" }, { status: 401 });
+  }
+  if ((session.user as any).role === "COLETA") {
+    return NextResponse.json({ error: "Permissao insuficiente" }, { status: 403 });
+  }
+
   const { id } = await params;
 
   const arquivo = await prisma.arquivo.findUnique({ where: { id } });

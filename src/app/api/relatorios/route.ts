@@ -1,14 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { parseExcel } from "@/lib/excel-parser";
-import { parseExcelComparativo } from "@/lib/excel-parser-comparativo";
-import { parseExcelNPS } from "@/lib/excel-parser-nps";
-import ExcelJS from "exceljs";
-import { DadosRelatorioAny, DadosRelatorioComparativo, DadosRelatorioNPS } from "@/types";
 import { auth } from "@/lib/auth";
 import type { Session } from "next-auth";
+import { createRelatorioFromBuffer } from "@/lib/report-service";
 
-type TipoRelatorio = "SAUDE" | "COMPARATIVO" | "NPS";
+type SessionLike = {
+  user?: {
+    id?: string | null;
+    email?: string | null;
+  } | null;
+} | null;
 
 function parseDateOrNow(input: string): Date {
   if (!input) return new Date();
@@ -43,6 +44,7 @@ function getDataColeta(dados: DadosRelatorioAny): Date {
 }
 
 async function resolveUsuarioIdFromSession(session: Session | null): Promise<string | null> {
+async function resolveUsuarioIdFromSession(session: SessionLike): Promise<string | null> {
   const sessionUserId = session?.user?.id;
   const sessionUserEmail = session?.user?.email;
 
@@ -68,18 +70,24 @@ async function resolveUsuarioIdFromSession(session: Session | null): Promise<str
 export async function GET() {
   const session = await auth();
   if (!session?.user?.id) {
-    return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
+    return NextResponse.json({ error: "Nao autorizado" }, { status: 401 });
   }
 
   const role = (session.user as any).role;
   const empresaId = (session.user as any).empresaId;
 
   // ACCESS RULES:
-  // ADMIN/TECNICO/USER can see their own (TECNICO/USER only see theirs)
-  // CLIENTE only sees reports for their Empresa
+  // ADMIN can see all
+  // CLIENTE sees reports from their company
+  // TECNICO/USER see only own records
+  // COLETA has no access to reports list
+  if (role === "COLETA") {
+    return NextResponse.json({ error: "Permissao insuficiente" }, { status: 403 });
+  }
+
   let where: any = {};
   if (role === "CLIENTE") {
-    where = { empresaId: empresaId };
+    where = { empresaId };
   } else if (role === "ADMIN") {
     where = {};
   } else {
@@ -91,86 +99,43 @@ export async function GET() {
     include: { empresa: true },
     orderBy: { createdAt: "desc" },
   });
+
   return NextResponse.json(relatorios);
 }
 
 export async function POST(req: NextRequest) {
   const session = await auth();
   if (!session?.user?.id) {
-    return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
+    return NextResponse.json({ error: "Nao autorizado" }, { status: 401 });
   }
 
   const role = (session.user as any).role;
-  // Clients cannot upload reports
-  if (role === "CLIENTE") {
-    return NextResponse.json({ error: "Permissão insuficiente para gerar relatórios" }, { status: 403 });
+  if (role === "CLIENTE" || role === "COLETA") {
+    return NextResponse.json({ error: "Permissao insuficiente para gerar relatorios" }, { status: 403 });
   }
 
   try {
     const formData = await req.formData();
     const file = formData.get("file") as File;
-    const tipoForm = String(formData.get("tipo") ?? "").toUpperCase();
+    const tipoForm = String(formData.get("tipo") ?? "").toUpperCase() || null;
+
     if (!file) {
       return NextResponse.json({ error: "Nenhum arquivo enviado" }, { status: 400 });
     }
 
-    const buffer = Buffer.from(await file.arrayBuffer());
-    let tipo: TipoRelatorio;
-    
-    if (tipoForm === "COMPARATIVO" || tipoForm === "SAUDE" || tipoForm === "NPS") {
-      tipo = tipoForm as TipoRelatorio;
-    } else {
-      tipo = await detectTipoRelatorio(buffer);
-    }
-
-    const dados: DadosRelatorioAny = tipo === "COMPARATIVO"
-      ? await parseExcelComparativo(buffer)
-      : tipo === "NPS"
-        ? await parseExcelNPS(buffer)
-        : await parseExcel(buffer);
-
-    console.log(`[Relatorios] Dados parseados com sucesso para empresa: ${dados.empresa.nome}`);
-
-    // Basic validation check
-    if (!dados.empresa.nome) {
-      console.error("[Relatorios] Erro: Nome da empresa não encontrado na planilha.");
-      return NextResponse.json(
-        { error: "Não foi possível identificar o nome da empresa na planilha. Verifique se o nome está na célula B1." },
-        { status: 400 }
-      );
-    }
-
-    // Find or create empresa
-    let empresa = await prisma.empresa.findFirst({
-      where: { nome: dados.empresa.nome },
-    });
-    if (!empresa) {
-      empresa = await prisma.empresa.create({
-        data: {
-          nome: dados.empresa.nome,
-          endereco: (dados as any).empresa.endereco || "",
-        },
-      });
-    }
-
     const usuarioId = await resolveUsuarioIdFromSession(session);
-
     if (!usuarioId) {
       return NextResponse.json(
-        { error: "Sessão inválida para gerar relatório. Faça logout e login novamente." },
+        { error: "Sessao invalida para gerar relatorio. Faca logout e login novamente." },
         { status: 401 }
       );
     }
 
-    const relatorio = await prisma.relatorio.create({
-      data: {
-        empresaId: empresa.id,
-        usuarioId,
-        dataColeta: getDataColeta(dados),
-        dados: JSON.parse(JSON.stringify(dados)),
-        pdfUrl: "internal:generate"
-      },
-      include: { empresa: true },
+    const buffer = Buffer.from(await file.arrayBuffer());
+    const { relatorio } = await createRelatorioFromBuffer({
+      buffer,
+      usuarioId,
+      tipoPreferido: tipoForm,
     });
 
     return NextResponse.json({

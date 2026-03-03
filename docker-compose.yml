@@ -37,6 +37,8 @@ services:
   cloudflared:
     image: cloudflare/cloudflared:latest
     restart: unless-stopped
+    profiles:
+      - tunnel
     command:
       - tunnel
       - --no-autoupdate
@@ -60,7 +62,5 @@ networks:
 volumes:
   postgres_data:
     name: eliza-v2_postgres_data
-    external: true
   uploads_data:
     name: eliza-v2_uploads_data
-    external: true
