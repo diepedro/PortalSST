@@ -1,0 +1,5 @@
+DATABASE_URL="postgresql://postgres:postgres@localhost:5432/eliza_sst?schema=public"
+NEXTAUTH_SECRET="dev-secret-change-in-production"
+NEXTAUTH_URL="http://localhost:3000"
+
+CLOUDFLARE_TUNNEL_TOKEN="eyJhIjoiMDlmZDMyMGRkZjM1MDIxNTExMmNkZWY5NTNjY2Y2ZWUiLCJ0IjoiNTc1NzZkMDktZjk4NC00OTYyLTg5ZTMtZTA1ZmMzZDFhZTFmIiwicyI6Ik16UXdNRE5qTmpndFlqazBNUzAwT0RKaExUZ3dPR1F0WlRrMFlqUmhPREUyTVRCaSJ9"
