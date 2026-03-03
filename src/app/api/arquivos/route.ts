@@ -17,6 +17,9 @@ export async function GET() {
   if (!session?.user) {
     return NextResponse.json({ error: "Nao autenticado" }, { status: 401 });
   }
+  if ((session.user as any).role === "COLETA") {
+    return NextResponse.json({ error: "Permissao insuficiente" }, { status: 403 });
+  }
   const arquivos = await prisma.arquivo.findMany({
     orderBy: { createdAt: "desc" },
   });
@@ -27,6 +30,9 @@ export async function POST(req: NextRequest) {
   const session = await auth();
   if (!session?.user) {
     return NextResponse.json({ error: "Nao autenticado" }, { status: 401 });
+  }
+  if ((session.user as any).role === "COLETA") {
+    return NextResponse.json({ error: "Permissao insuficiente" }, { status: 403 });
   }
   try {
     ensureDir();
@@ -61,3 +67,5 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Erro no upload" }, { status: 500 });
   }
 }
+
+

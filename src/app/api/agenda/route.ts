@@ -41,6 +41,9 @@ export async function GET() {
   }
 
   const role = (session.user as any).role;
+  if (role === "COLETA") {
+    return NextResponse.json({ error: "Permissao insuficiente" }, { status: 403 });
+  }
   const userId = session.user.id;
 
   const atividades = await prisma.atividade.findMany({
@@ -70,6 +73,9 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
     const role = (session.user as any).role;
+    if (role === "COLETA") {
+      return NextResponse.json({ error: "Permissao insuficiente" }, { status: 403 });
+    }
     const userEmpresaId = (session.user as any).empresaId;
 
     let targetEmpresaId: string;
@@ -175,6 +181,9 @@ export async function PATCH(req: NextRequest) {
     const body = await req.json();
     const { id, empresa: empresaNome, stockItems, ...rest } = body;
     const role = (session.user as any).role;
+    if (role === "COLETA") {
+      return NextResponse.json({ error: "Permissao insuficiente" }, { status: 403 });
+    }
 
     const atual = await prisma.atividade.findUnique({
       where: { id },
@@ -260,7 +269,7 @@ export async function PATCH(req: NextRequest) {
 export async function DELETE(req: NextRequest) {
   const session = await auth();
   const role = (session?.user as any)?.role;
-  if (role !== "ADMIN" && role !== "TECNICO") {
+  if (role === "COLETA" || (role !== "ADMIN" && role !== "TECNICO")) {
     return NextResponse.json({ error: "Não autorizado" }, { status: 403 });
   }
 
@@ -273,3 +282,5 @@ export async function DELETE(req: NextRequest) {
     return NextResponse.json({ error: "Erro ao excluir atividade" }, { status: 500 });
   }
 }
+
+

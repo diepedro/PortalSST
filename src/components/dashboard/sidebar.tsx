@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 import {
   LayoutDashboard,
   FileBarChart,
+  FileSpreadsheet,
   CalendarDays,
   Users,
   FolderOpen,
@@ -22,7 +23,8 @@ import { Button } from "@/components/ui/button";
 
 const navItems = [
   { href: "/dashboard", label: "Painel", icon: LayoutDashboard, roles: ["ADMIN", "TECNICO", "USER"] },
-  { href: "/dashboard/relatorios", label: "Relatórios", icon: FileBarChart, roles: ["ADMIN", "TECNICO", "USER"] },
+  { href: "/dashboard/relatorios", label: "Relatorios", icon: FileBarChart, roles: ["ADMIN", "TECNICO", "USER"] },
+  { href: "/dashboard/planilhas", label: "Planilhas", icon: FileSpreadsheet, roles: ["ADMIN", "TECNICO", "USER", "COLETA"] },
   { href: "/dashboard/agenda", label: "Agenda", icon: CalendarDays, roles: ["ADMIN", "TECNICO", "USER", "CLIENTE"] },
   { href: "/dashboard/profissionais", label: "Profissionais", icon: Users, roles: ["ADMIN", "TECNICO"] },
   { href: "/dashboard/estoque", label: "Estoque", icon: Package, roles: ["ADMIN", "TECNICO"] },
@@ -31,7 +33,7 @@ const navItems = [
 ];
 
 const adminItems = [
-  { href: "/dashboard/usuarios", label: "Usuários", icon: UserCog, roles: ["ADMIN"] },
+  { href: "/dashboard/usuarios", label: "Usuarios", icon: UserCog, roles: ["ADMIN"] },
 ];
 
 export function Sidebar() {
@@ -40,8 +42,8 @@ export function Sidebar() {
   const { data: session } = useSession();
   const userRole = (session?.user as any)?.role || "USER";
 
-  const filteredNavItems = navItems.filter(item => item.roles.includes(userRole));
-  const filteredAdminItems = adminItems.filter(item => item.roles.includes(userRole));
+  const filteredNavItems = navItems.filter((item) => item.roles.includes(userRole));
+  const filteredAdminItems = adminItems.filter((item) => item.roles.includes(userRole));
 
   return (
     <>
@@ -73,19 +75,13 @@ export function Sidebar() {
             className="text-white/70 hover:text-white hover:bg-white/10 ml-auto"
             onClick={() => setCollapsed(!collapsed)}
           >
-            {collapsed ? (
-              <Menu className="h-4 w-4" />
-            ) : (
-              <ChevronLeft className="h-4 w-4" />
-            )}
+            {collapsed ? <Menu className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
           </Button>
         </div>
 
         <nav className="flex-1 py-4 space-y-1 px-3 overflow-y-auto">
           {filteredNavItems.map((item) => {
-            const isActive =
-              pathname === item.href ||
-              (item.href !== "/dashboard" && pathname.startsWith(item.href));
+            const isActive = pathname === item.href || (item.href !== "/dashboard" && pathname.startsWith(item.href));
             return (
               <Link
                 key={item.href}
@@ -97,12 +93,8 @@ export function Sidebar() {
                     : "text-white/70 hover:bg-white/10 hover:text-white"
                 )}
               >
-                <item.icon
-                  className={cn("h-5 w-5 flex-shrink-0", isActive && "drop-shadow-sm")}
-                />
-                {!collapsed && (
-                  <span className="text-sm font-medium">{item.label}</span>
-                )}
+                <item.icon className={cn("h-5 w-5 flex-shrink-0", isActive && "drop-shadow-sm")} />
+                {!collapsed && <span className="text-sm font-medium">{item.label}</span>}
               </Link>
             );
           })}
@@ -110,9 +102,7 @@ export function Sidebar() {
           {filteredAdminItems.length > 0 && (
             <>
               {!collapsed && (
-                <p className="text-white/30 text-xs uppercase tracking-wider px-3 pt-4 pb-1">
-                  Administração
-                </p>
+                <p className="text-white/30 text-xs uppercase tracking-wider px-3 pt-4 pb-1">Administracao</p>
               )}
               {collapsed && <div className="border-t border-white/10 my-2" />}
               {filteredAdminItems.map((item) => {
@@ -128,12 +118,8 @@ export function Sidebar() {
                         : "text-white/70 hover:bg-white/10 hover:text-white"
                     )}
                   >
-                    <item.icon
-                      className={cn("h-5 w-5 flex-shrink-0", isActive && "drop-shadow-sm")}
-                    />
-                    {!collapsed && (
-                      <span className="text-sm font-medium">{item.label}</span>
-                    )}
+                    <item.icon className={cn("h-5 w-5 flex-shrink-0", isActive && "drop-shadow-sm")} />
+                    {!collapsed && <span className="text-sm font-medium">{item.label}</span>}
                   </Link>
                 );
               })}

@@ -30,7 +30,7 @@ interface User {
   id: string;
   name: string;
   email: string;
-  role: "ADMIN" | "TECNICO" | "USER" | "CLIENTE";
+  role: "ADMIN" | "TECNICO" | "USER" | "CLIENTE" | "COLETA";
   createdAt: string;
   empresa?: { nome: string };
 }
@@ -89,10 +89,6 @@ export default function UsuariosPage() {
     e.preventDefault();
     if (!form.name || !form.email || !form.password) {
       toast.error("Preencha todos os campos obrigatorios");
-      return;
-    }
-    if (!form.empresaId || form.empresaId === "none") {
-      toast.error("Selecione uma empresa para o usuário");
       return;
     }
     setSaving(true);
@@ -214,6 +210,7 @@ export default function UsuariosPage() {
                     <SelectContent>
                       <SelectItem value="USER">Usuário Comum</SelectItem>
                       <SelectItem value="TECNICO">Técnico / Enfermeiro</SelectItem>
+                      <SelectItem value="COLETA">Coleta (Planilhas)</SelectItem>
                       <SelectItem value="CLIENTE">Cliente</SelectItem>
                       <SelectItem value="ADMIN">Administrador</SelectItem>
                     </SelectContent>
@@ -244,7 +241,7 @@ export default function UsuariosPage() {
                     </SelectContent>
                   </Select>
                   {form.role === "CLIENTE" && (
-                    <p className="text-[10px] text-muted-foreground animate-in fade-in">Vínculo obrigatório para perfil Cliente</p>
+                    <p className="text-[10px] text-muted-foreground animate-in fade-in">Perfil Cliente sera vinculado automaticamente a empresa Hospitalar</p>
                   )}
                 </div>
                 <div className="flex gap-3 pt-2">
@@ -323,6 +320,8 @@ export default function UsuariosPage() {
                                   ? "bg-purple-100 text-purple-700"
                                   : user.role === "CLIENTE"
                                   ? "bg-orange-100 text-orange-700"
+                                  : user.role === "COLETA"
+                                  ? "bg-teal-100 text-teal-700"
                                   : "bg-gray-100 text-gray-600"
                               }
                             >
@@ -360,3 +359,6 @@ export default function UsuariosPage() {
     </>
   );
 }
+
+
+
