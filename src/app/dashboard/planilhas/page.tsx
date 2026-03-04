@@ -62,11 +62,13 @@ type Linha = {
   glicemia: number;
   comorbidades: string;
   sexo: number;
+  telefone?: string;
 };
 
 type ColetaDraft = {
   empresaNome: string;
   empresaEndereco: string;
+  profissionalNome: string;
   dataColeta: string;
   horarioColeta: string;
   qtdColaboradores: number;
@@ -84,7 +86,41 @@ const emptyLinha: Linha = {
   glicemia: 0,
   comorbidades: "",
   sexo: 1,
+  telefone: "",
 };
+
+function formatTimeMask(value: string) {
+  const digits = value.replace(/\D/g, "");
+  let formatted = digits;
+  if (digits.length >= 2) {
+    formatted = digits.slice(0, 2);
+    if (digits.length > 2) {
+      formatted += ":" + digits.slice(2, 4);
+    }
+    if (digits.length > 4) {
+      formatted += " - " + digits.slice(4, 6);
+    }
+    if (digits.length > 6) {
+      formatted += ":" + digits.slice(6, 8);
+    }
+  }
+  return formatted.slice(0, 13);
+}
+
+function formatPhoneMask(value: string) {
+  const digits = value.replace(/\D/g, "");
+  let formatted = "";
+  if (digits.length > 0) {
+    formatted = "(" + digits.slice(0, 2);
+    if (digits.length > 2) {
+      formatted += ") " + digits.slice(2, 7);
+    }
+    if (digits.length > 7) {
+      formatted += "-" + digits.slice(7, 11);
+    }
+  }
+  return formatted.slice(0, 15);
+}
 
 function formatSize(bytes: number) {
   if (bytes < 1024) return `${bytes} B`;
@@ -136,6 +172,20 @@ function clinicaStatus(p: Linha) {
   };
 }
 
+const COMORBIDADES_OPTIONS = [
+  "Nega comorbidades",
+  "Hipertensão Arterial Sistêmica (HAS)",
+  "Outras doenças cardiovasculares",
+  "Diabetes Mellitus",
+  "Dislipidemia",
+  "Distúrbios da Tireoide",
+  "Doenças imunossupressoras",
+  "Doenças respiratórias",
+  "Depressão e/ou Transtornos de Ansiedade",
+  "Tabagismo",
+  "Etilismo",
+];
+
 export default function PlanilhasPage() {
   const router = useRouter();
   const { data: session, status } = useSession();
@@ -153,6 +203,7 @@ export default function PlanilhasPage() {
 
   const [empresaNome, setEmpresaNome] = useState("");
   const [empresaEndereco, setEmpresaEndereco] = useState("");
+  const [profissionalNome, setProfissionalNome] = useState("");
   const [dataColeta, setDataColeta] = useState(hojeISO());
   const [horarioColeta, setHorarioColeta] = useState("");
   const [qtdColaboradores, setQtdColaboradores] = useState<number>(0);
@@ -162,6 +213,25 @@ export default function PlanilhasPage() {
   const [draftInfo, setDraftInfo] = useState<string>("");
   const nomeParticipanteRef = useRef<HTMLInputElement | null>(null);
   const inicioColetaRef = useRef<HTMLDivElement | null>(null);
+
+  const toggleComorbidade = (opt: string) => {
+    setNovoParticipante((prev) => {
+      const current = prev.comorbidades ? prev.comorbidades.split(", ").filter(Boolean) : [];
+      let next: string[];
+
+      if (opt === "Nega comorbidades") {
+        next = current.includes(opt) ? [] : [opt];
+      } else {
+        const semNega = current.filter((i) => i !== "Nega comorbidades");
+        if (semNega.includes(opt)) {
+          next = semNega.filter((i) => i !== opt);
+        } else {
+          next = [...semNega, opt];
+        }
+      }
+      return { ...prev, comorbidades: next.join(", ") };
+    });
+  };
 
   const canGenerate = role !== "COLETA";
   const isColeta = role === "COLETA";
@@ -212,6 +282,7 @@ export default function PlanilhasPage() {
       const parsed = JSON.parse(raw) as ColetaDraft;
       setEmpresaNome(parsed.empresaNome || "");
       setEmpresaEndereco(parsed.empresaEndereco || "");
+      setProfissionalNome(parsed.profissionalNome || "");
       setDataColeta(parsed.dataColeta || hojeISO());
       setHorarioColeta(parsed.horarioColeta || "");
       setQtdColaboradores(Number(parsed.qtdColaboradores || 0));
@@ -229,6 +300,7 @@ export default function PlanilhasPage() {
     const payload: ColetaDraft = {
       empresaNome,
       empresaEndereco,
+      profissionalNome,
       dataColeta,
       horarioColeta,
       qtdColaboradores,
@@ -243,6 +315,7 @@ export default function PlanilhasPage() {
     session,
     empresaNome,
     empresaEndereco,
+    profissionalNome,
     dataColeta,
     horarioColeta,
     qtdColaboradores,
@@ -413,6 +486,7 @@ export default function PlanilhasPage() {
     const payload: ColetaDraft = {
       empresaNome,
       empresaEndereco,
+      profissionalNome,
       dataColeta,
       horarioColeta,
       qtdColaboradores,
@@ -446,6 +520,7 @@ export default function PlanilhasPage() {
           empresa: {
             nome: empresaNome,
             endereco: empresaEndereco,
+            profissional: profissionalNome,
             dataColeta,
             horario: horarioColeta,
             qtdColaboradores,
@@ -463,6 +538,7 @@ export default function PlanilhasPage() {
       toast.success("Coleta iniciada e planilha criada");
       setEmpresaNome("");
       setEmpresaEndereco("");
+      setProfissionalNome("");
       setHorarioColeta("");
       setQtdColaboradores(0);
       setParticipantesDraft([]);
@@ -572,6 +648,10 @@ export default function PlanilhasPage() {
                   <Label>Endereco</Label>
                   <Input value={empresaEndereco} onChange={(e) => setEmpresaEndereco(e.target.value)} placeholder="Endereco da coleta" />
                 </div>
+                <div className="space-y-1">
+                  <Label>Profissional Responsável</Label>
+                  <Input value={profissionalNome} onChange={(e) => setProfissionalNome(e.target.value)} placeholder="Nome do profissional" />
+                </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-1">
                     <Label>Data *</Label>
@@ -579,7 +659,11 @@ export default function PlanilhasPage() {
                   </div>
                   <div className="space-y-1">
                     <Label>Horario</Label>
-                    <Input value={horarioColeta} onChange={(e) => setHorarioColeta(e.target.value)} placeholder="08:00 - 12:00" />
+                    <Input 
+                      value={horarioColeta} 
+                      onChange={(e) => setHorarioColeta(formatTimeMask(e.target.value))} 
+                      placeholder="08:00 - 12:00" 
+                    />
                   </div>
                 </div>
                 <div className="space-y-1">
@@ -594,28 +678,84 @@ export default function PlanilhasPage() {
             <CardHeader>
               <CardTitle className="text-base">Adicionar participante</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-3">
-              <Input ref={nomeParticipanteRef} value={novoParticipante.nome} onChange={(e) => setNovoParticipante((p) => ({ ...p, nome: e.target.value }))} placeholder="Nome" />
-              <div className="grid grid-cols-2 gap-2">
-                <Input type="number" value={novoParticipante.idade || ""} onChange={(e) => setNovoParticipante((p) => ({ ...p, idade: Number(e.target.value || 0) }))} placeholder="Idade" />
-                <Input type="number" step="0.01" value={novoParticipante.altura || ""} onChange={(e) => setNovoParticipante((p) => ({ ...p, altura: Number(e.target.value || 0) }))} placeholder="Altura (m)" />
+            <CardContent className="space-y-4">
+              <div className="space-y-1">
+                <Label>Nome</Label>
+                <Input ref={nomeParticipanteRef} value={novoParticipante.nome} onChange={(e) => setNovoParticipante((p) => ({ ...p, nome: e.target.value }))} placeholder="Nome completo" />
               </div>
-              <div className="grid grid-cols-2 gap-2">
-                <Input type="number" step="0.1" value={novoParticipante.peso || ""} onChange={(e) => setNovoParticipante((p) => ({ ...p, peso: Number(e.target.value || 0) }))} placeholder="Peso" />
-                <Input value={novoParticipante.pa} onChange={(e) => setNovoParticipante((p) => ({ ...p, pa: e.target.value }))} placeholder="PA (ex: 120/80)" />
+              
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <Label>Idade</Label>
+                  <Input type="number" value={novoParticipante.idade || ""} onChange={(e) => setNovoParticipante((p) => ({ ...p, idade: Number(e.target.value || 0) }))} placeholder="Ex: 30" />
+                </div>
+                <div className="space-y-1">
+                  <Label>Altura (m)</Label>
+                  <Input type="number" step="0.01" value={novoParticipante.altura || ""} onChange={(e) => setNovoParticipante((p) => ({ ...p, altura: Number(e.target.value || 0) }))} placeholder="Ex: 1.75" />
+                </div>
               </div>
-              <div className="grid grid-cols-2 gap-2">
-                <Input type="number" value={novoParticipante.fc || ""} onChange={(e) => setNovoParticipante((p) => ({ ...p, fc: Number(e.target.value || 0) }))} placeholder="FC" />
-                <Input type="number" value={novoParticipante.glicemia || ""} onChange={(e) => setNovoParticipante((p) => ({ ...p, glicemia: Number(e.target.value || 0) }))} placeholder="Glicemia" />
+
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <Label>Peso (kg)</Label>
+                  <Input type="number" step="0.1" value={novoParticipante.peso || ""} onChange={(e) => setNovoParticipante((p) => ({ ...p, peso: Number(e.target.value || 0) }))} placeholder="Ex: 75.5" />
+                </div>
+                <div className="space-y-1">
+                  <Label>PA</Label>
+                  <Input value={novoParticipante.pa} onChange={(e) => setNovoParticipante((p) => ({ ...p, pa: e.target.value }))} placeholder="Ex: 120/80" />
+                </div>
               </div>
-              <Input value={novoParticipante.comorbidades} onChange={(e) => setNovoParticipante((p) => ({ ...p, comorbidades: e.target.value }))} placeholder="Comorbidades" />
-              <div className="grid grid-cols-2 gap-2">
-                <Button type="button" variant={novoParticipante.sexo === 1 ? "default" : "outline"} className={novoParticipante.sexo === 1 ? "bg-[#1e3a8a]" : ""} onClick={() => setNovoParticipante((p) => ({ ...p, sexo: 1 }))}>
-                  Sexo 1 (F)
-                </Button>
-                <Button type="button" variant={novoParticipante.sexo === 2 ? "default" : "outline"} className={novoParticipante.sexo === 2 ? "bg-[#1e3a8a]" : ""} onClick={() => setNovoParticipante((p) => ({ ...p, sexo: 2 }))}>
-                  Sexo 2 (M)
-                </Button>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <Label>Glicemia</Label>
+                  <Input type="number" value={novoParticipante.glicemia || ""} onChange={(e) => setNovoParticipante((p) => ({ ...p, glicemia: Number(e.target.value || 0) }))} placeholder="Ex: 95" />
+                </div>
+                <div className="space-y-1">
+                  <Label>Telefone (Opcional)</Label>
+                  <Input 
+                    value={novoParticipante.telefone || ""} 
+                    onChange={(e) => setNovoParticipante((p) => ({ ...p, telefone: formatPhoneMask(e.target.value) }))} 
+                    placeholder="(00) 00000-0000" 
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Comorbidades</Label>
+                <div className="grid grid-cols-1 gap-1 border rounded-lg p-3 bg-gray-50/50 max-h-48 overflow-y-auto">
+                  {COMORBIDADES_OPTIONS.map((opt) => {
+                    const isSelected = novoParticipante.comorbidades?.split(", ").includes(opt);
+                    return (
+                      <div
+                        key={opt}
+                        onClick={() => toggleComorbidade(opt)}
+                        className={`flex items-center gap-2 p-2 rounded-md cursor-pointer transition-colors ${
+                          isSelected ? "bg-blue-100 border-blue-200" : "hover:bg-gray-100"
+                        }`}
+                      >
+                        <div className={`w-4 h-4 border rounded flex items-center justify-center ${
+                          isSelected ? "bg-[#1e3a8a] border-[#1e3a8a]" : "bg-white border-gray-300"
+                        }`}>
+                          {isSelected && <CheckCircle2 className="h-3 w-3 text-white" />}
+                        </div>
+                        <span className="text-xs">{opt}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div className="space-y-1">
+                <Label>Sexo</Label>
+                <div className="grid grid-cols-2 gap-2">
+                  <Button type="button" variant={novoParticipante.sexo === 1 ? "default" : "outline"} className={novoParticipante.sexo === 1 ? "bg-[#1e3a8a]" : ""} onClick={() => setNovoParticipante((p) => ({ ...p, sexo: 1 }))}>
+                    Feminino
+                  </Button>
+                  <Button type="button" variant={novoParticipante.sexo === 2 ? "default" : "outline"} className={novoParticipante.sexo === 2 ? "bg-[#1e3a8a]" : ""} onClick={() => setNovoParticipante((p) => ({ ...p, sexo: 2 }))}>
+                    Masculino
+                  </Button>
+                </div>
               </div>
 
               {novoParticipanteClinica.hasAlert && (
@@ -634,16 +774,10 @@ export default function PlanilhasPage() {
                 </div>
               )}
 
-              <div className="grid grid-cols-2 gap-2">
-                <Button type="button" variant="outline" onClick={adicionarParticipante}>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Adicionar
-                </Button>
-                <Button type="button" className="bg-[#1e3a8a] hover:bg-[#22c55e]" onClick={proximoParticipante}>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Proximo
-                </Button>
-              </div>
+              <Button type="button" className="w-full bg-[#1e3a8a] hover:bg-[#22c55e] h-12 text-base font-medium" onClick={proximoParticipante}>
+                <Plus className="h-5 w-5 mr-2" />
+                Adicionar e Próximo
+              </Button>
             </CardContent>
           </Card>
 

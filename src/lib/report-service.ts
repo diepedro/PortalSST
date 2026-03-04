@@ -119,7 +119,7 @@ export async function readPlanilhaMetadata(buffer: Buffer): Promise<{
 
   const tipo = await detectTipoRelatorio(buffer);
   const empresaNome = String(ws.getCell("B1").value ?? "").trim();
-  const rawData = ws.getCell("B3").value;
+  const rawData = ws.getCell("B4").value;
 
   let dataColetaTexto = "";
   if (rawData instanceof Date) {

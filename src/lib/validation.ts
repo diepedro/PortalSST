@@ -4,6 +4,7 @@ export const DadosRelatorioSchema = z.object({
   empresa: z.object({
     nome: z.string().min(1, "Nome da empresa é obrigatório"),
     endereco: z.string().optional().default(""),
+    profissional: z.string().optional().default(""),
     dataColeta: z.string().optional().default(""),
     horario: z.string().optional().default(""),
     qtdColaboradores: z.number().nonnegative().default(0),
@@ -55,6 +56,18 @@ export const DadosRelatorioSchema = z.object({
     normocardia: z.number().nonnegative().optional(),
     taquicardia: z.number().nonnegative().optional(),
   }).optional(),
+  comorbidades: z.object({
+    has: z.number().nonnegative().default(0),
+    cardiovascular: z.number().nonnegative().default(0),
+    diabetes: z.number().nonnegative().default(0),
+    dislipidemia: z.number().nonnegative().default(0),
+    tireoide: z.number().nonnegative().default(0),
+    imunossupressora: z.number().nonnegative().default(0),
+    respiratoria: z.number().nonnegative().default(0),
+    saudeMental: z.number().nonnegative().default(0),
+    tabagismo: z.number().nonnegative().default(0),
+    etilismo: z.number().nonnegative().default(0),
+  }).optional(),
   participantes: z.array(z.object({
     nome: z.string(),
     idade: z.number(),
@@ -73,6 +86,7 @@ export const DadosRelatorioSchema = z.object({
     fcStatus: z.string(),
     fcAlterado: z.boolean(),
     comorbidades: z.string(),
+    telefone: z.string().optional(),
   })).optional(),
 });
 
