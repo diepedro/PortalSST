@@ -34,6 +34,7 @@ export async function POST(req: NextRequest) {
     const empresa = body?.empresa as {
       nome?: string;
       endereco?: string;
+      profissional?: string;
       dataColeta?: string;
       horario?: string;
       qtdColaboradores?: number;
@@ -63,11 +64,12 @@ export async function POST(req: NextRequest) {
       empresa: {
         nome: String(empresa.nome),
         endereco: String(empresa.endereco || ""),
+        profissional: String(empresa.profissional || ""),
         dataColeta: String(empresa.dataColeta),
         horario: String(empresa.horario || ""),
         qtdColaboradores: Number(empresa.qtdColaboradores || 0),
       },
-      participantes,
+      participantes: participantes as any,
     });
 
     const fileName = `${Date.now()}_${safeChunk(String(empresa.nome))}_coleta.xlsx`;
@@ -75,10 +77,11 @@ export async function POST(req: NextRequest) {
     fs.writeFileSync(filePath, buffer);
 
     const meta = await readPlanilhaMetadata(buffer);
+    const profSuffix = empresa.profissional ? `_${safeChunk(String(empresa.profissional))}` : "";
 
     const planilha = await prisma.planilha.create({
       data: {
-        nome: `Coleta_${empresa.nome}.xlsx`,
+        nome: `Coleta_${empresa.nome}${profSuffix}.xlsx`,
         tipo: "SAUDE",
         tamanho: buffer.byteLength,
         arquivoPath: fileName,

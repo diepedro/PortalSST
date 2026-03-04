@@ -51,10 +51,13 @@ function getIdadeFaixa(idade: number): string {
 }
 
 function getIMCStatus(imc: number): { status: string; alterado: boolean } {
-  if (imc < 18.5) return { status: "Abaixo do peso", alterado: true };
+  if (imc <= 0) return { status: "Não informado", alterado: false };
+  if (imc < 18.5) return { status: "Baixo peso", alterado: true };
   if (imc < 25) return { status: "Peso normal", alterado: false };
   if (imc < 30) return { status: "Sobrepeso", alterado: true };
-  return { status: "Obesidade", alterado: true };
+  if (imc < 35) return { status: "Obesidade Grau I", alterado: true };
+  if (imc < 40) return { status: "Obesidade Grau II", alterado: true };
+  return { status: "Obesidade Grau III", alterado: true };
 }
 
 function getPAStatus(pa: string): { status: string; alterado: boolean } {
@@ -65,10 +68,11 @@ function getPAStatus(pa: string): { status: string; alterado: boolean } {
   const sis = parseInt(match[1]);
   const dia = parseInt(match[2]);
 
-  if (sis < 120 && dia < 80) return { status: "Normal", alterado: false };
-  if (sis < 130 && dia < 80) return { status: "Elevada", alterado: true };
-  if (sis < 140 && dia < 90) return { status: "Hipertensão Estágio 1", alterado: true };
-  return { status: "Hipertensão Estágio 2", alterado: true };
+  if (sis <= 120 && dia <= 80) return { status: "Ótima/Normal", alterado: false };
+  if (sis <= 139 && dia <= 89) return { status: "Pré-Hipertensão", alterado: true };
+  if (sis <= 159 && dia <= 99) return { status: "Hipertensão Estágio 1", alterado: true };
+  if (sis <= 179 && dia <= 109) return { status: "Hipertensão Estágio 2", alterado: true };
+  return { status: "Hipertensão Estágio 3", alterado: true };
 }
 
 function getGlicemiaStatus(gc: number): { status: string; alterado: boolean } {
@@ -86,19 +90,10 @@ function getFCStatus(fc: number): { status: string; alterado: boolean } {
 }
 
 function mapComorbidades(comorbidades: string): string {
-  if (!comorbidades) return "Saudável";
-  const c = comorbidades.toLowerCase();
-  if (c.includes("ausência") || c.includes("nenhuma") || c.includes("não possui")) return "Saudável";
-  
-  const groups: string[] = [];
-  if (c.includes("ansiedade") || c.includes("depressão")) groups.push("Tratamento Mental");
-  if (c.includes("tabagista") || c.includes("fuma")) groups.push("Fumante");
-  if (c.includes("etilismo") || c.includes("álcool") || c.includes("bebe")) groups.push("Abuso de Álcool");
-  if (c.includes("anti-hipertensivo") || c.includes("pressão")) groups.push("Hipertensão Arterial");
-  if (c.includes("antiglicemiante") || c.includes("diabetes") || c.includes("insulina")) groups.push("Diabetes Mellitus");
-  
-  if (groups.length === 0) return comorbidades.trim();
-  return groups.join(", ");
+  if (!comorbidades) return "Nega comorbidades";
+  const c = comorbidades.toLowerCase().trim();
+  if (c === "" || c.includes("ausência") || c.includes("nenhuma") || c.includes("não possui") || c.includes("nega")) return "Nega comorbidades";
+  return comorbidades.trim();
 }
 
 export async function parseExcel(buffer: Buffer): Promise<DadosRelatorio> {
@@ -109,10 +104,10 @@ export async function parseExcel(buffer: Buffer): Promise<DadosRelatorio> {
   const cell = (ref: string): unknown => ws.getCell(ref).value;
 
   // ── Company info ──────────────────────────────────────────────────────────
-  const empresaNome = String(unwrap(cell("B1")) ?? "").trim();
-  const endereco = String(unwrap(cell("B2")) ?? "").trim();
-
-  const rawDate = unwrap(cell("B3"));
+  const empresaNome = String(unwrap(cell("B1")) ?? "Empresa");
+  const endereco = String(unwrap(cell("B2")) ?? "");
+  const profissional = String(unwrap(cell("B3")) ?? "");
+  const rawDate = unwrap(cell("B4"));
   let dataColeta = "";
   if (rawDate instanceof Date) {
     dataColeta = rawDate.toLocaleDateString("pt-BR");
@@ -120,32 +115,32 @@ export async function parseExcel(buffer: Buffer): Promise<DadosRelatorio> {
     dataColeta = String(rawDate ?? "").split(" ")[0];
   }
 
-  const horario = String(unwrap(cell("B4")) ?? "").trim();
-  const qtdColaboradores = toInt(cell("B5"));
+  const horario = String(unwrap(cell("B5")) ?? "").trim();
+  const qtdColaboradores = toInt(cell("B6"));
 
-  // ── Compute from raw data table (Row 7+) ───────────────────────────────
+  // ── Compute from raw data table (Row 8+) ───────────────────────────────
   const participantes: any[] = [];
   ws.eachRow((row, rowNumber) => {
-    if (rowNumber < 7) return;
+    if (rowNumber < 8) return;
     
-    // Nome: F (6), Idade: G (7), Altura: H (8), Peso: I (9), PA: J (10), FC: K (11), Glicemia: L (12), Comorbidades: M (13), Sexo: N (14)
-    const nomeRaw = String(unwrap(row.getCell(6).value) ?? "");
+    // Novas Colunas: A (1) Nome, B (2) Idade, C (3) Altura, D (4) Peso, E (5) PA, F (6) FC, G (7) Glicemia, H (8) Comorbidades, I (9) Sexo, J (10) Telefone
+    const nomeRaw = String(unwrap(row.getCell(1).value) ?? "");
     if (!nomeRaw) return;
 
-    const idade = toInt(row.getCell(7).value);
+    const idade = toInt(row.getCell(2).value);
     
-    // Altura (H): Se > 3, assume que está em cm (ex: 170) e converte para metros (1.70)
-    let altura = toFloat(row.getCell(8).value);
+    let altura = toFloat(row.getCell(3).value);
     if (altura > 3) altura = altura / 100;
 
-    const peso = toFloat(row.getCell(9).value);
-    const pa = String(unwrap(row.getCell(10).value) ?? "");
-    const fc = toInt(row.getCell(11).value);
-    const gc = toInt(row.getCell(12).value);
-    const comorbRaw = String(unwrap(row.getCell(13).value) ?? "");
-    const sexo = toInt(row.getCell(14).value); // 1=Fem, 2=Masc
+    const peso = toFloat(row.getCell(4).value);
+    const pa = String(unwrap(row.getCell(5).value) ?? "");
+    const fc = toInt(row.getCell(6).value);
+    const gc = toInt(row.getCell(7).value);
+    const comorbRaw = String(unwrap(row.getCell(8).value) ?? "");
+    const sexo = toInt(row.getCell(9).value); // 1=Fem, 2=Masc
+    const telefone = String(unwrap(row.getCell(10).value) ?? "");
 
-    const imc = altura > 0 ? peso / (altura * altura) : 0;
+    const imc = (altura > 0 && peso > 0) ? peso / (altura * altura) : 0;
     const imcData = getIMCStatus(imc);
     const paData = getPAStatus(pa);
     const gcData = getGlicemiaStatus(gc);
@@ -156,7 +151,7 @@ export async function parseExcel(buffer: Buffer): Promise<DadosRelatorio> {
       idade,
       idadeFaixa: getIdadeFaixa(idade),
       genero: sexo,
-      imc: parseFloat(imc.toFixed(1)),
+      imc: imc > 0 ? parseFloat(imc.toFixed(1)) : 0,
       imcStatus: imcData.status,
       imcAlterado: imcData.alterado,
       pa,
@@ -168,7 +163,8 @@ export async function parseExcel(buffer: Buffer): Promise<DadosRelatorio> {
       fc,
       fcStatus: fcData.status,
       fcAlterado: fcData.alterado,
-      comorbidades: mapComorbidades(comorbRaw)
+      comorbidades: mapComorbidades(comorbRaw),
+      telefone
     });
   });
 
@@ -195,19 +191,19 @@ export async function parseExcel(buffer: Buffer): Promise<DadosRelatorio> {
       masculino: participantes.filter(p => p.genero === 2).length,
     },
     imc: {
-      magreza: participantes.filter(p => p.imcStatus === "Abaixo do peso").length / (totalParticipantes || 1),
-      normal: participantes.filter(p => p.imcStatus === "Peso normal").length / (totalParticipantes || 1),
-      sobrepeso: participantes.filter(p => p.imcStatus === "Sobrepeso").length / (totalParticipantes || 1),
-      obesidade: participantes.filter(p => p.imcStatus === "Obesidade").length / (totalParticipantes || 1),
-      obesidadeGrave: 0, 
+      magreza: participantes.filter(p => p.imcStatus === "Baixo peso").length,
+      normal: participantes.filter(p => p.imcStatus === "Peso normal").length,
+      sobrepeso: participantes.filter(p => p.imcStatus === "Sobrepeso").length,
+      obesidade: participantes.filter(p => p.imcStatus === "Obesidade Grau I").length,
+      obesidadeGrave: participantes.filter(p => p.imcStatus === "Obesidade Grau II" || p.imcStatus === "Obesidade Grau III").length, 
     },
     pressaoArterial: {
-      otima: participantes.filter(p => p.paStatus === "Normal").length,
+      otima: participantes.filter(p => p.paStatus === "Ótima/Normal").length,
       normal: 0,
-      preHipertensao: participantes.filter(p => p.paStatus === "Elevada").length,
+      preHipertensao: participantes.filter(p => p.paStatus === "Pré-Hipertensão").length,
       hipertensaoEst1: participantes.filter(p => p.paStatus === "Hipertensão Estágio 1").length,
       hipertensaoEst2: participantes.filter(p => p.paStatus === "Hipertensão Estágio 2").length,
-      hipertensaoEst3: 0,
+      hipertensaoEst3: participantes.filter(p => p.paStatus === "Hipertensão Estágio 3").length,
     },
     glicemia: {
       normal: participantes.filter(p => !p.glicemiaAlterado).length,
@@ -223,6 +219,18 @@ export async function parseExcel(buffer: Buffer): Promise<DadosRelatorio> {
       normocardia: participantes.filter(p => p.fcStatus === "Normocardia").length,
       taquicardia: participantes.filter(p => p.fcStatus === "Taquicardia").length,
     },
+    comorbidades: {
+      has: participantes.filter(p => p.comorbidades.toLowerCase().includes("hipertensão") || p.comorbidades.toLowerCase().includes("has")).length,
+      cardiovascular: participantes.filter(p => p.comorbidades.toLowerCase().includes("cardio") || p.comorbidades.toLowerCase().includes("coracao")).length,
+      diabetes: participantes.filter(p => p.comorbidades.toLowerCase().includes("diabetes") || p.comorbidades.toLowerCase().includes("glicemiante")).length,
+      dislipidemia: participantes.filter(p => p.comorbidades.toLowerCase().includes("dislipidemia") || p.comorbidades.toLowerCase().includes("colesterol") || p.comorbidades.toLowerCase().includes("trigliceri")).length,
+      tireoide: participantes.filter(p => p.comorbidades.toLowerCase().includes("tireoide")).length,
+      imunossupressora: participantes.filter(p => p.comorbidades.toLowerCase().includes("imunossup")).length,
+      respiratoria: participantes.filter(p => p.comorbidades.toLowerCase().includes("asma") || p.comorbidades.toLowerCase().includes("dpoc") || p.comorbidades.toLowerCase().includes("respiratoria")).length,
+      saudeMental: participantes.filter(p => p.comorbidades.toLowerCase().includes("depressao") || p.comorbidades.toLowerCase().includes("ansiedade") || p.comorbidades.toLowerCase().includes("mental")).length,
+      tabagismo: participantes.filter(p => p.comorbidades.toLowerCase().includes("tabagismo") || p.comorbidades.toLowerCase().includes("fuma")).length,
+      etilismo: participantes.filter(p => p.comorbidades.toLowerCase().includes("etilismo") || p.comorbidades.toLowerCase().includes("álcool") || p.comorbidades.toLowerCase().includes("bebe")).length,
+    },
     participantes
   };
 
@@ -230,6 +238,7 @@ export async function parseExcel(buffer: Buffer): Promise<DadosRelatorio> {
     empresa: {
       nome: empresaNome,
       endereco,
+      profissional,
       dataColeta,
       horario,
       qtdColaboradores,

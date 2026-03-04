@@ -15,6 +15,24 @@ export async function GET() {
   if (!(await requireAdmin())) {
     return NextResponse.json({ error: "Acesso restrito" }, { status: 403 });
   }
+
+  // AUTO-CREATE COLETA FOR TESTING IF NOT EXISTS
+  const emailColeta = "coleta@meggawork.com";
+  const passColeta = "coleta123";
+  const existingColeta = await prisma.user.findUnique({ where: { email: emailColeta } });
+  if (!existingColeta) {
+    const hash = await bcrypt.hash(passColeta, 12);
+    await prisma.user.create({
+      data: {
+        name: "Usuario Coleta Teste",
+        email: emailColeta,
+        password: hash,
+        role: "COLETA",
+      }
+    });
+    console.log(`Usuario ${emailColeta} criado automaticamente para testes.`);
+  }
+
   const users = await prisma.user.findMany({
     select: {
       id: true,

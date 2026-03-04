@@ -16,12 +16,27 @@ export interface Participante {
   fcStatus: string;
   fcAlterado: boolean;
   comorbidades: string;
+  telefone?: string;
+}
+
+export interface ComorbidadesDetalhadas {
+  has: number;
+  cardiovascular: number;
+  diabetes: number;
+  dislipidemia: number;
+  tireoide: number;
+  imunossupressora: number;
+  respiratoria: number;
+  saudeMental: number;
+  tabagismo: number;
+  etilismo: number;
 }
 
 export interface DadosRelatorio {
   empresa: {
     nome: string;
     endereco: string;
+    profissional?: string;
     dataColeta: string;
     horario: string;
     qtdColaboradores: number;
@@ -70,6 +85,7 @@ export interface DadosRelatorio {
     normocardia?: number;
     taquicardia?: number;
   };
+  comorbidades?: ComorbidadesDetalhadas;
   participantes?: Participante[];
 }
 
