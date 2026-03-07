@@ -706,7 +706,11 @@ export default function PlanilhasPage() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-3 gap-3">
+                <div className="space-y-1">
+                  <Label>Frequência cardíaca</Label>
+                  <Input type="number" value={novoParticipante.fc || ""} onChange={(e) => setNovoParticipante((p) => ({ ...p, fc: Number(e.target.value || 0) }))} placeholder="Ex: 72" />
+                </div>
                 <div className="space-y-1">
                   <Label>Glicemia</Label>
                   <Input type="number" value={novoParticipante.glicemia || ""} onChange={(e) => setNovoParticipante((p) => ({ ...p, glicemia: Number(e.target.value || 0) }))} placeholder="Ex: 95" />

@@ -44,7 +44,6 @@ import {
   X,
 } from "lucide-react";
 import { toast } from "sonner";
-import { StockSelector, StockItem } from "@/components/dashboard/stock-selector";
 
 interface Atividade {
   id: string;
@@ -114,7 +113,6 @@ const emptyForm = {
   qtdPalestras: 1,
   kmRodado: 0,
   status: "AGENDADA",
-  stockItems: [] as StockItem[],
 };
 
 function normalizeCity(value?: string | null) {
@@ -391,21 +389,14 @@ function FormFields({
       )}
 
       <div>
-        <Label>Materiais / Observacoes</Label>
+        <Label>Observacoes</Label>
         <Textarea
           value={form.materiais}
           onChange={(e) => setForm({ ...form, materiais: e.target.value })}
-          placeholder="Lista de materiais ou detalhes da solicitacao"
+          placeholder="Detalhes da solicitacao"
           rows={2}
         />
       </div>
-
-      {!isCliente && (
-        <StockSelector 
-          selectedItems={form.stockItems} 
-          onChange={(items) => setForm({ ...form, stockItems: items })} 
-        />
-      )}
     </div>
   );
 }
@@ -500,7 +491,6 @@ export default function AgendaPage() {
       qtdPalestras: ativ.qtdPalestras || 1,
       kmRodado: cidadeFixa ? 0 : (ativ.kmRodado || 0),
       status: ativ.status,
-      stockItems: [],
     });
     setEditOpen(true);
   }

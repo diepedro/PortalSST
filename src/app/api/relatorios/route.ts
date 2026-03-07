@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
-import type { Session } from "next-auth";
-import { createRelatorioFromBuffer } from "@/lib/report-service";
+import { createRelatorioComparativoFromBuffers, createRelatorioFromBuffer } from "@/lib/report-service";
 
 type SessionLike = {
   user?: {
@@ -11,39 +10,6 @@ type SessionLike = {
   } | null;
 } | null;
 
-function parseDateOrNow(input: string): Date {
-  if (!input) return new Date();
-  const parts = input.split("/");
-  if (parts.length === 3) {
-    const iso = `${parts[2]}-${parts[1]}-${parts[0]}`;
-    const dt = new Date(iso);
-    if (!Number.isNaN(dt.getTime())) return dt;
-  }
-  const dt = new Date(input);
-  if (!Number.isNaN(dt.getTime())) return dt;
-  return new Date();
-}
-
-async function detectTipoRelatorio(buffer: Buffer): Promise<TipoRelatorio> {
-  const workbook = new ExcelJS.Workbook();
-  await workbook.xlsx.load(buffer as unknown as ArrayBuffer);
-  const ws = workbook.worksheets[0];
-  const cellA3 = String(ws.getCell("A3").value ?? "").toLowerCase();
-  if (cellA3.includes("primeira data")) return "COMPARATIVO";
-  return "SAUDE";
-}
-
-function getDataColeta(dados: DadosRelatorioAny): Date {
-  if ((dados as DadosRelatorioComparativo).tipo === "COMPARATIVO") {
-    return parseDateOrNow((dados as DadosRelatorioComparativo).empresa.segundaData);
-  }
-  if ((dados as DadosRelatorioNPS).tipo === "NPS") {
-    return parseDateOrNow((dados as DadosRelatorioNPS).empresa.data);
-  }
-  return parseDateOrNow((dados as { empresa: { dataColeta: string } }).empresa.dataColeta);
-}
-
-async function resolveUsuarioIdFromSession(session: Session | null): Promise<string | null> {
 async function resolveUsuarioIdFromSession(session: SessionLike): Promise<string | null> {
   const sessionUserId = session?.user?.id;
   const sessionUserEmail = session?.user?.email;
@@ -117,11 +83,9 @@ export async function POST(req: NextRequest) {
   try {
     const formData = await req.formData();
     const file = formData.get("file") as File;
+    const fileAntes = formData.get("fileAntes") as File;
+    const fileDepois = formData.get("fileDepois") as File;
     const tipoForm = String(formData.get("tipo") ?? "").toUpperCase() || null;
-
-    if (!file) {
-      return NextResponse.json({ error: "Nenhum arquivo enviado" }, { status: 400 });
-    }
 
     const usuarioId = await resolveUsuarioIdFromSession(session);
     if (!usuarioId) {
@@ -131,17 +95,37 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const buffer = Buffer.from(await file.arrayBuffer());
-    const { relatorio } = await createRelatorioFromBuffer({
-      buffer,
-      usuarioId,
-      tipoPreferido: tipoForm,
-    });
+    let result:
+      | { relatorio: any; alertasProcessamento: string[] }
+      | { relatorio: any; alertasProcessamento: string[] };
+
+    if (tipoForm === "COMPARATIVO" && fileAntes && fileDepois) {
+      const bufferAntes = Buffer.from(await fileAntes.arrayBuffer());
+      const bufferDepois = Buffer.from(await fileDepois.arrayBuffer());
+      const { relatorio, alertasProcessamento } = await createRelatorioComparativoFromBuffers({
+        bufferAntes,
+        bufferDepois,
+        usuarioId,
+      });
+      result = { relatorio, alertasProcessamento };
+    } else {
+      if (!file) {
+        return NextResponse.json({ error: "Nenhum arquivo enviado" }, { status: 400 });
+      }
+      const buffer = Buffer.from(await file.arrayBuffer());
+      const { relatorio, alertasProcessamento } = await createRelatorioFromBuffer({
+        buffer,
+        usuarioId,
+        tipoPreferido: tipoForm,
+      });
+      result = { relatorio, alertasProcessamento };
+    }
 
     return NextResponse.json({
       success: true,
-      relatorio,
-      downloadUrl: `/api/relatorios/${relatorio.id}/pdf`,
+      relatorio: result.relatorio,
+      alertasProcessamento: result.alertasProcessamento,
+      downloadUrl: `/api/relatorios/${result.relatorio.id}/pdf`,
     });
   } catch (error) {
     console.error("Erro ao gerar relatorio:", error);
