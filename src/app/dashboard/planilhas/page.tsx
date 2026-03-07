@@ -49,6 +49,7 @@ type Planilha = {
   tamanho: number;
   empresaNome: string | null;
   dataColetaTexto: string | null;
+  usuario?: { id: string; name: string; email?: string };
   createdAt: string;
 };
 
@@ -853,6 +854,7 @@ export default function PlanilhasPage() {
                     <div className="min-w-0">
                       <p className="text-sm font-medium truncate">{p.nome}</p>
                       <p className="text-xs text-muted-foreground truncate">{p.empresaNome || "-"} - {p.dataColetaTexto || "-"}</p>
+                      <p className="text-xs text-muted-foreground truncate">Profissional responsável: {p.usuario?.name || "-"}</p>
                     </div>
                     <div className="flex gap-1">
                       <Button size="sm" variant="outline" onClick={() => abrirEditor(p.id)}>
@@ -955,12 +957,13 @@ export default function PlanilhasPage() {
                   <div className="text-center py-12 text-muted-foreground">Nenhuma planilha cadastrada</div>
                 ) : (
                   <Table>
-                    <TableHeader><TableRow><TableHead>Nome</TableHead><TableHead>Empresa</TableHead><TableHead>Tipo</TableHead><TableHead>Data da Coleta</TableHead><TableHead>Tamanho</TableHead><TableHead className="text-right">Acoes</TableHead></TableRow></TableHeader>
+                    <TableHeader><TableRow><TableHead>Nome</TableHead><TableHead>Empresa</TableHead><TableHead>Profissional responsável</TableHead><TableHead>Tipo</TableHead><TableHead>Data da Coleta</TableHead><TableHead>Tamanho</TableHead><TableHead className="text-right">Acoes</TableHead></TableRow></TableHeader>
                     <TableBody>
                       {planilhas.map((p) => (
                         <TableRow key={p.id}>
                           <TableCell className="font-medium">{p.nome}</TableCell>
                           <TableCell>{p.empresaNome || "-"}</TableCell>
+                          <TableCell>{p.usuario?.name || "-"}</TableCell>
                           <TableCell><Badge variant="outline">{p.tipo}</Badge></TableCell>
                           <TableCell>{p.dataColetaTexto || "-"}</TableCell>
                           <TableCell>{formatSize(p.tamanho)}</TableCell>

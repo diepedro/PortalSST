@@ -1,5 +1,5 @@
 ﻿import React from "react";
-import { Document, Page, Text, View, StyleSheet, Image } from "@react-pdf/renderer";
+import { Document, Page, Text, View, StyleSheet, Image, Svg, Path } from "@react-pdf/renderer";
 import { DadosRelatorio } from "@/types";
 
 const palette = {
@@ -53,12 +53,12 @@ const styles = StyleSheet.create({
   },
   coverBlock: {
     flex: 1,
-    justifyContent: "space-between",
+    justifyContent: "center",
   },
   coverTop: {
-    borderBottomWidth: 1,
-    borderBottomColor: "#2F5FBF",
-    paddingBottom: 24,
+    alignItems: "center",
+    justifyContent: "center",
+    flex: 1,
   },
   coverTitle: {
     fontSize: 42,
@@ -113,12 +113,10 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: "#2F5FBF",
     paddingTop: 14,
-    flexDirection: "row",
-    justifyContent: "space-between",
     alignItems: "center",
   },
   coverFooterText: {
-    fontSize: 8,
+    fontSize: 10,
     color: "#BFD4FF",
   },
   coverTag: {
@@ -177,6 +175,34 @@ const styles = StyleSheet.create({
     backgroundColor: "#F3F7FC",
     borderRadius: 4,
     paddingVertical: 8,
+    paddingRight: 8,
+  },
+  companyHeaderCard: {
+    borderWidth: 1,
+    borderColor: palette.slateSoft,
+    borderRadius: 8,
+    backgroundColor: palette.white,
+    padding: 10,
+    marginBottom: 10,
+  },
+  companyHeaderGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+  },
+  companyHeaderItem: {
+    width: "50%",
+    marginBottom: 6,
+  },
+  companyHeaderLabel: {
+    fontSize: 7.2,
+    textTransform: "uppercase",
+    color: palette.slate,
+    marginBottom: 2,
+  },
+  companyHeaderValue: {
+    fontSize: 8.8,
+    color: palette.navy,
+    fontWeight: "bold",
     paddingRight: 8,
   },
   quoteText: {
@@ -259,15 +285,20 @@ const styles = StyleSheet.create({
   barHead: {
     flexDirection: "row",
     justifyContent: "space-between",
+    alignItems: "flex-start",
     marginBottom: 2,
   },
   barLabel: {
-    fontSize: 8.8,
+    fontSize: 8.2,
     color: palette.navy,
+    maxWidth: "72%",
+    lineHeight: 1.25,
   },
   barValue: {
-    fontSize: 8.8,
+    fontSize: 8.2,
     color: palette.slate,
+    width: "26%",
+    textAlign: "right",
   },
   barTrack: {
     width: "100%",
@@ -339,6 +370,62 @@ const styles = StyleSheet.create({
     color: palette.slate,
     lineHeight: 1.45,
     marginBottom: 4,
+  },
+  helperCard: {
+    borderWidth: 1,
+    borderRadius: 10,
+    padding: 10,
+    marginTop: 6,
+    backgroundColor: "#F8FBFF",
+  },
+  helperHead: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 6,
+  },
+  helperIcon: {
+    width: 16,
+    height: 16,
+    borderRadius: 99,
+    textAlign: "center",
+    fontSize: 10,
+    fontWeight: "bold",
+    color: palette.white,
+    marginRight: 6,
+    paddingTop: 1,
+  },
+  helperText: {
+    fontSize: 8.6,
+    lineHeight: 1.45,
+    color: palette.slate,
+  },
+  preventiveCard: {
+    borderWidth: 1,
+    borderRadius: 10,
+    padding: 9,
+    marginBottom: 8,
+    backgroundColor: palette.white,
+  },
+  preventiveRow: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+  },
+  preventiveBadge: {
+    width: 24,
+    height: 24,
+    borderRadius: 99,
+    marginRight: 8,
+    color: palette.white,
+    fontSize: 10,
+    fontWeight: "bold",
+    textAlign: "center",
+    paddingTop: 6,
+  },
+  preventiveText: {
+    flex: 1,
+    fontSize: 8.8,
+    lineHeight: 1.4,
+    color: palette.navy,
   },
   tocCard: {
     borderWidth: 1,
@@ -498,6 +585,76 @@ const styles = StyleSheet.create({
     color: palette.slate,
     marginTop: 4,
   },
+  pieCard: {
+    borderWidth: 1,
+    borderColor: palette.slateSoft,
+    borderRadius: 8,
+    backgroundColor: palette.white,
+    padding: 10,
+    marginBottom: 6,
+  },
+  pieWrap: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  pieLegendWrap: {
+    width: "52%",
+    paddingLeft: 8,
+  },
+  pieLegendItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 6,
+  },
+  pieLegendDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 99,
+    marginRight: 5,
+  },
+  pieLegendText: {
+    fontSize: 8.5,
+    color: palette.navy,
+  },
+  columnsCard: {
+    borderWidth: 1,
+    borderColor: palette.slateSoft,
+    borderRadius: 10,
+    backgroundColor: palette.white,
+    padding: 10,
+    marginBottom: 10,
+  },
+  columnsWrap: {
+    flexDirection: "row",
+    alignItems: "flex-end",
+    justifyContent: "space-between",
+    height: 140,
+    marginTop: 6,
+    marginBottom: 6,
+  },
+  columnItem: {
+    width: "23%",
+    alignItems: "center",
+  },
+  columnValue: {
+    fontSize: 7.8,
+    color: palette.navy,
+    marginBottom: 4,
+    fontWeight: "bold",
+  },
+  columnBar: {
+    width: "68%",
+    minHeight: 4,
+    borderRadius: 6,
+  },
+  columnLabel: {
+    marginTop: 5,
+    fontSize: 7.3,
+    color: palette.slate,
+    textAlign: "center",
+    lineHeight: 1.3,
+  },
   footer: {
     position: "absolute",
     left: 34,
@@ -541,26 +698,6 @@ function getRiskBand(index: number): "Controlado" | "Moderado" | "Elevado" | "Cr
   return "Controlado";
 }
 
-function KpiCard({
-  title,
-  value,
-  detail,
-  marginRight,
-}: {
-  title: string;
-  value: string;
-  detail: string;
-  marginRight?: number;
-}) {
-  return (
-    <View style={[styles.kpiCard, { marginRight: marginRight ?? 0 }]}>
-      <Text style={styles.kpiLabel}>{title}</Text>
-      <Text style={styles.kpiValue}>{value}</Text>
-      <Text style={styles.kpiDetail}>{detail}</Text>
-    </View>
-  );
-}
-
 function Bars({ title, subtitle, total, data }: { title: string; subtitle: string; total: number; data: Segment[] }) {
   const safeTotal = Math.max(total, 1);
   return (
@@ -587,6 +724,113 @@ function Bars({ title, subtitle, total, data }: { title: string; subtitle: strin
   );
 }
 
+function polarToCartesian(cx: number, cy: number, r: number, angleInDeg: number) {
+  const angleInRad = ((angleInDeg - 90) * Math.PI) / 180;
+  return {
+    x: cx + r * Math.cos(angleInRad),
+    y: cy + r * Math.sin(angleInRad),
+  };
+}
+
+function describeArc(cx: number, cy: number, r: number, startAngle: number, endAngle: number) {
+  const start = polarToCartesian(cx, cy, r, endAngle);
+  const end = polarToCartesian(cx, cy, r, startAngle);
+  const largeArcFlag = endAngle - startAngle <= 180 ? "0" : "1";
+  return `M ${cx} ${cy} L ${start.x} ${start.y} A ${r} ${r} 0 ${largeArcFlag} 0 ${end.x} ${end.y} Z`;
+}
+
+function PieChart({
+  title,
+  subtitle,
+  total,
+  data,
+}: {
+  title: string;
+  subtitle: string;
+  total: number;
+  data: Segment[];
+}) {
+  const safeTotal = Math.max(total, 1);
+  const cx = 52;
+  const cy = 52;
+  const r = 44;
+  const slices = data.reduce<Array<{ key: string; d: string; color: string }>>((acc, item, index) => {
+    const previousSweep = acc.reduce((sum, _, i) => {
+      const prevPct = clamp(percent(data[i].value, safeTotal), 0, 100);
+      return sum + (prevPct / 100) * 360;
+    }, 0);
+    const pct = clamp(percent(item.value, safeTotal), 0, 100);
+    if (pct <= 0) return acc;
+    const sweep = (pct / 100) * 360;
+    acc.push({
+      key: `pie-${item.label}-${index}`,
+      d: describeArc(cx, cy, r, previousSweep, previousSweep + sweep),
+      color: item.color,
+    });
+    return acc;
+  }, []);
+
+  return (
+    <View style={styles.pieCard}>
+      <Text style={styles.cardTitle}>{title}</Text>
+      <Text style={styles.cardSubtitle}>{subtitle}</Text>
+      <View style={styles.pieWrap}>
+        <Svg width={104} height={104}>
+          {slices.map((slice) => (
+            <Path key={slice.key} d={slice.d} fill={slice.color} />
+          ))}
+        </Svg>
+        <View style={styles.pieLegendWrap}>
+          {data.map((item, index) => {
+            const pct = clamp(percent(item.value, safeTotal), 0, 100);
+            return (
+              <View key={`legend-${item.label}-${index}`} style={styles.pieLegendItem}>
+                <View style={[styles.pieLegendDot, { backgroundColor: item.color }]} />
+                <Text style={styles.pieLegendText}>
+                  {item.label}: {item.value} ({formatPct(pct)})
+                </Text>
+              </View>
+            );
+          })}
+        </View>
+      </View>
+    </View>
+  );
+}
+
+function ColumnsChart({
+  title,
+  subtitle,
+  total,
+  data,
+}: {
+  title: string;
+  subtitle: string;
+  total: number;
+  data: Segment[];
+}) {
+  const safeTotal = Math.max(total, 1);
+  return (
+    <View style={styles.columnsCard}>
+      <Text style={styles.cardTitle}>{title}</Text>
+      <Text style={styles.cardSubtitle}>{subtitle}</Text>
+      <View style={styles.columnsWrap}>
+        {data.map((item, index) => {
+          const pct = clamp(percent(item.value, safeTotal), 0, 100);
+          const h = Math.max(6, (pct / 100) * 110);
+          return (
+            <View key={`col-${item.label}-${index}`} style={styles.columnItem}>
+              <Text style={styles.columnValue}>{item.value}</Text>
+              <View style={[styles.columnBar, { height: h, backgroundColor: item.color }]} />
+              <Text style={styles.columnLabel}>{item.label}</Text>
+            </View>
+          );
+        })}
+      </View>
+    </View>
+  );
+}
+
 function Footer({ pageNumber }: { pageNumber: string }) {
   return (
     <View style={styles.footer}>
@@ -606,6 +850,30 @@ function PageVectors() {
   );
 }
 
+function getGeneroTexto(genero: { feminino: number; masculino: number }): string {
+  if (genero.feminino === genero.masculino) {
+    return "O grande ponto de convergência para ambos os gêneros é a prevenção, desenvolvimento de bons hábitos e diagnóstico precoce, que atuam como a ferramenta mais poderosa para impedir e frear o avanço de doenças crônicas e garantir um envelhecimento com autonomia e qualidade de vida.";
+  }
+  if (genero.feminino >= genero.masculino) {
+    return "Nota-se maior prevalência de condições ligadas a flutuações hormonais, ao sistema imunológico e à longevidade. Entre as principais comorbidades que afetam o público feminino estão as doenças autoimunes, a osteoporose, os distúrbios da tireoide e quadros de demência. Deve-se focar educação em saúde e programas de prevenção nesses âmbitos.";
+  }
+  return "Muitas das comorbidades que os afetam de forma mais severa são agravadas pela resistência em buscar acompanhamento médico e por fatores de risco comportamentais como etilismo e tabagismo. Além de apresentarem maiores taxas de doenças hepáticas, diabetes tipo 2 e problemas prostáticos. Nesse contexto, o maior passo preventivo é quebrar o tabu.";
+}
+
+function getFaixaEtariaTexto(faixas: { label: string; valor: number }[]): string {
+  const faixasValidas = faixas.filter((faixa) => ["18-30", "31-40", "41-50", ">50"].includes(faixa.label));
+  if (!faixasValidas.length) {
+    return "A leitura por faixa etária orienta a priorização de medidas preventivas de acordo com o ciclo de vida predominante da população avaliada.";
+  }
+  const dominante = faixasValidas.reduce((acc, item) => (item.valor > acc.valor ? item : acc), faixasValidas[0]);
+  const label = dominante.label.toLowerCase();
+  const jovemAdulto = label.includes("18") || label.includes("30") || label.includes("31") || label.includes("40");
+  if (jovemAdulto) {
+    return "Na juventude e fase adulta o corpo geralmente está no seu auge físico, mas no processo de construção de maus hábitos e o estresse diário tendem a aumentar. A prevenção aqui deve ser focada na construção bons hábitos como da atividade física, construção de reserva cognitiva, prevenção da saúde mental e alerta dos malefícios de maus hábitos.";
+  }
+  return "A partir da meia idade devemos focar no cuidado e seguir com a prevenção. O foco principal deve se voltar para o sistema cardiovascular, já que os riscos de hipertensão, colesterol alto e infartos aumentam significativamente nessa faixa. É fundamental intensificar o rastreio metabólico, monitorar o risco de diabetes tipo 2 e iniciar os exames oncológicos preventivos de rotina e declínios cognitivos.";
+}
+
 export function RelatorioSaudePDF({ dados, logoPath }: { dados: DadosRelatorio; logoPath?: string }) {
   const { empresa, adesao, idade, imc, pressaoArterial, genero } = dados;
   const comorbidades = dados.comorbidades ?? {
@@ -622,7 +890,6 @@ export function RelatorioSaudePDF({ dados, logoPath }: { dados: DadosRelatorio; 
   };
 
   const total = Math.max(adesao.totalParticipantes, 1);
-  const cobertura = clamp(adesao.percentualAdesao ?? 0, 0, 100);
   const excessoPeso = imc.sobrepeso + imc.obesidade + imc.obesidadeGrave;
   const riscoPressorico = pressaoArterial.preHipertensao + pressaoArterial.hipertensaoEst1 + pressaoArterial.hipertensaoEst2 + pressaoArterial.hipertensaoEst3;
   const hipertensaoCritica = pressaoArterial.hipertensaoEst2 + pressaoArterial.hipertensaoEst3;
@@ -653,23 +920,32 @@ export function RelatorioSaudePDF({ dados, logoPath }: { dados: DadosRelatorio; 
     { label: "Feminino", value: genero.feminino, color: palette.violetStrong },
     { label: "Masculino", value: genero.masculino, color: palette.blueStrong },
   ];
-  const idadeData: Segment[] = idade.faixas.map((faixa, index) => {
+  const generoSemRegistro = Math.max(total - (genero.feminino + genero.masculino), 0);
+  if (generoSemRegistro > 0) {
+    generoData.push({ label: "NÃ£o informado", value: generoSemRegistro, color: palette.slate });
+  }
+  const idadeData: Segment[] = idade.faixas.filter((faixa) => faixa.label !== "NÃ£o informado").map((faixa, index) => {
     const cores = [palette.cyanStrong, palette.blueStrong, palette.amber, palette.wine, palette.violetStrong];
     return { label: faixa.label, value: faixa.valor, color: cores[index % cores.length] };
   });
   const hipertensaoData: Segment[] = [
-    { label: "Otima", value: pressaoArterial.otima, color: palette.moss },
-    { label: "Normal", value: pressaoArterial.normal, color: "#22C55E" },
+    { label: "Normal", value: pressaoArterial.normal + pressaoArterial.otima, color: "#22C55E" },
     { label: "Pre-HAS", value: pressaoArterial.preHipertensao, color: palette.amber },
     { label: "HAS Estagio 1", value: pressaoArterial.hipertensaoEst1, color: palette.orangeStrong },
     { label: "HAS Estagio 2", value: pressaoArterial.hipertensaoEst2, color: palette.wine },
     { label: "HAS Estagio 3", value: pressaoArterial.hipertensaoEst3, color: "#881337" },
   ];
   const obesidadeData: Segment[] = [
+    { label: "Magreza", value: imc.magreza, color: palette.cyanStrong },
+    { label: "Peso normal", value: imc.normal, color: palette.moss },
     { label: "Sobrepeso", value: imc.sobrepeso, color: palette.amber },
     { label: "Obesidade", value: imc.obesidade, color: palette.orangeStrong },
     { label: "Obesidade grave", value: imc.obesidadeGrave, color: palette.wine },
   ];
+  const imcSemRegistro = Math.max(total - (imc.magreza + imc.normal + imc.sobrepeso + imc.obesidade + imc.obesidadeGrave), 0);
+  if (imcSemRegistro > 0) {
+    obesidadeData.push({ label: "Sem registro IMC", value: imcSemRegistro, color: palette.slate });
+  }
   const glicemiaData: Segment[] = dados.glicemia
     ? [
         { label: "Hipoglicemia", value: dados.glicemia.hipoglicemia ?? 0, color: palette.cyanStrong },
@@ -677,6 +953,18 @@ export function RelatorioSaudePDF({ dados, logoPath }: { dados: DadosRelatorio; 
         { label: "Hiperglicemia", value: dados.glicemia.hiperglicemia ?? dados.glicemia.alterada, color: palette.wine },
       ]
     : [];
+  const glicemiaSemRegistro = dados.glicemia
+    ? Math.max(
+        total -
+          ((dados.glicemia.hipoglicemia ?? 0) +
+            (dados.glicemia.normoglicemia ?? dados.glicemia.normal) +
+            (dados.glicemia.hiperglicemia ?? dados.glicemia.alterada)),
+        0
+      )
+    : 0;
+  if (glicemiaSemRegistro > 0) {
+    glicemiaData.push({ label: "Sem registro glicemia", value: glicemiaSemRegistro, color: palette.slate });
+  }
   const fcData: Segment[] = dados.frequenciaCardiaca
     ? [
         { label: "Bradicardia", value: dados.frequenciaCardiaca.bradicardia ?? 0, color: palette.cyanStrong },
@@ -684,17 +972,90 @@ export function RelatorioSaudePDF({ dados, logoPath }: { dados: DadosRelatorio; 
         { label: "Taquicardia", value: dados.frequenciaCardiaca.taquicardia ?? dados.frequenciaCardiaca.alterada, color: palette.wine },
       ]
     : [];
+  const fcSemRegistro = dados.frequenciaCardiaca
+    ? Math.max(
+        total -
+          ((dados.frequenciaCardiaca.bradicardia ?? 0) +
+            (dados.frequenciaCardiaca.normocardia ?? dados.frequenciaCardiaca.normal) +
+            (dados.frequenciaCardiaca.taquicardia ?? dados.frequenciaCardiaca.alterada)),
+        0
+      )
+    : 0;
+  if (fcSemRegistro > 0) {
+    fcData.push({ label: "Sem registro FC", value: fcSemRegistro, color: palette.slate });
+  }
   const comorbidadesData: Segment[] = [
     { label: "HAS", value: comorbidades.has, color: palette.wine },
     { label: "Diabetes", value: comorbidades.diabetes, color: palette.orangeStrong },
     { label: "Dislipidemia", value: comorbidades.dislipidemia, color: palette.amber },
     { label: "Cardiovascular", value: comorbidades.cardiovascular, color: palette.blueStrong },
-    { label: "Saúde mental", value: comorbidades.saudeMental, color: palette.violetStrong },
+    { label: "Transtornos mentais comuns", value: comorbidades.saudeMental, color: palette.violetStrong },
   ];
-
-  const faixa50maisPct = clamp(idade.percentualAcima50 ?? 0, 0, 100);
-  const faixa18a30Pct = clamp(idade.percentual18a30 ?? 0, 0, 100);
-  const dcntNucleo = comorbidades.has + comorbidades.diabetes + comorbidades.cardiovascular + comorbidades.dislipidemia;
+  const participantes = dados.participantes ?? [];
+  const faixasOrdem = ["18-30", "31-40", "41-50", ">50"];
+  const imcAlteradoStatus = new Set(["Sobrepeso", "Obesidade Grau I", "Obesidade Grau II", "Obesidade Grau III"]);
+  const pressaoNormalTotal = pressaoArterial.otima + pressaoArterial.normal;
+  const pressaoNormalVsAlteradaData: Segment[] = [
+    { label: "PA normal", value: pressaoNormalTotal, color: palette.moss },
+    { label: "Alterações pressóricas", value: riscoPressorico, color: palette.wine },
+  ];
+  const pressaoFaixaEtariaData: Segment[] = faixasOrdem.map((faixa, index) => {
+    const cores = [palette.cyanStrong, palette.blueStrong, palette.amber, palette.wine];
+    return {
+      label: faixa,
+      value: participantes.filter((p) => p.idadeFaixa === faixa && p.paAlterado).length,
+      color: cores[index % cores.length],
+    };
+  });
+  const obesidadeFaixaEtariaData: Segment[] = faixasOrdem.map((faixa, index) => {
+    const cores = [palette.cyanStrong, palette.blueStrong, palette.amber, palette.wine];
+    return {
+      label: faixa,
+      value: participantes.filter((p) => p.idadeFaixa === faixa && imcAlteradoStatus.has(p.imcStatus)).length,
+      color: cores[index % cores.length],
+    };
+  });
+  const obesidadeGeneroData: Segment[] = [
+    {
+      label: "Feminino",
+      value: participantes.filter((p) => p.genero === 1 && imcAlteradoStatus.has(p.imcStatus)).length,
+      color: palette.violetStrong,
+    },
+    {
+      label: "Masculino",
+      value: participantes.filter((p) => p.genero === 2 && imcAlteradoStatus.has(p.imcStatus)).length,
+      color: palette.blueStrong,
+    },
+  ];
+  const glicemiaImcData: Segment[] = [
+    {
+      label: "IMC adequado + glicemia alterada",
+      value: participantes.filter((p) => !imcAlteradoStatus.has(p.imcStatus) && p.glicemiaAlterado).length,
+      color: palette.cyanStrong,
+    },
+    {
+      label: "IMC alterado + glicemia alterada",
+      value: participantes.filter((p) => imcAlteradoStatus.has(p.imcStatus) && p.glicemiaAlterado).length,
+      color: palette.wine,
+    },
+  ];
+  const saudaveis = participantes.filter(
+    (p) =>
+      p.comorbidades === "Nega comorbidades" &&
+      p.paStatus === "Normal" &&
+      p.imcStatus === "Peso normal" &&
+      p.glicemiaStatus === "Normoglicemia" &&
+      p.fcStatus === "Normocardia"
+  ).length;
+  const pressaoAlteradaOuHas = participantes.filter((p) => p.paAlterado || /hipertens|has/i.test(p.comorbidades)).length;
+  const imcAlteradoTotal = participantes.filter((p) => imcAlteradoStatus.has(p.imcStatus)).length;
+  const hiperglicemiaTotal = participantes.filter((p) => p.glicemiaStatus === "Hiperglicemia").length;
+  const correlacaoGlobalData: Segment[] = [
+    { label: "Pessoas saudáveis", value: saudaveis, color: palette.moss },
+    { label: "Pressão arterial alterada", value: pressaoAlteradaOuHas, color: palette.blueStrong },
+    { label: "IMC alterado", value: imcAlteradoTotal, color: palette.orangeStrong },
+    { label: "Hiperglicemia", value: hiperglicemiaTotal, color: palette.wine },
+  ];
 
   const sindromeMetabolicaProxy = clamp(
     (percent(excessoPeso, total) + percent(riscoPressorico, total) + percent(glicemiaAlta + comorbidades.diabetes, total)) / 3,
@@ -702,30 +1063,23 @@ export function RelatorioSaudePDF({ dados, logoPath }: { dados: DadosRelatorio; 
     100
   );
 
-  const sumarioExecutivo = `A população avaliada (${adesao.totalParticipantes} colaboradores, cobertura de ${formatPct(
-    cobertura
-  )}) apresenta perfil de risco ${faixaRisco.toLowerCase()} com maior concentração em eixos cardiometabólicos. O Índice Global de Risco foi estimado em ${formatPct(
-    indiceGlobalRisco
-  )}, sinalizando necessidade de resposta estruturada para evitar escalada de absenteísmo, perda de produtividade e maior consumo médico-assistencial no próximo ciclo.`;
-
-  const leituraFinanceira = `A leitura executiva prioriza risco clínico e organizacional imediato, com foco em prevalências por estágio (hipertensão, obesidade e glicemia) para ação preventiva de curto prazo.`;
-
   const discussaoCruzada = `A combinação de excesso de peso (${formatPct(percent(excessoPeso, total))}), alteração pressórica (${formatPct(
     percent(riscoPressorico, total)
   )}) e disfunção glicêmica (${formatPct(percent(glicemiaAlta, total))}) sustenta um proxy de síndrome metabólica de ${formatPct(
     sindromeMetabolicaProxy
   )}. Esse arranjo aumenta risco de eventos isquêmicos agudos, especialmente quando coexistem hipertensão em estágios avançados (${hipertensaoCritica} casos).`;
 
-  const discussaoEtaria = `A proporção de colaboradores com 50+ anos (${formatPct(
-    faixa50maisPct
-  )}) indica maior probabilidade de agravamento de DCNT. Em paralelo, a base jovem (18-30) representa ${formatPct(
-    faixa18a30Pct
-  )}, janela estratégica para prevenção primária e desaceleração de risco futuro. Núcleo de DCNT identificado: ${dcntNucleo} registros.`;
+  const discussaoEtaria = getFaixaEtariaTexto(idade.faixas);
+  const discussaoGenero = getGeneroTexto(genero);
 
   const metodologiaTexto =
-    "Análise transversal de indicadores biométrico-clínicos e autorreferidos, com estratificação por risco e estimativa de impacto operacional. O Índice Global de Risco (IGR) consolida eixos cardiovascular, metabólico, saúde mental e hábitos.";
+    "A coleta de dados é realizada de forma individual com cada colaborador por meio de entrevista estruturada e avaliação de sinais vitais. Durante a entrevista são registrados dados demográficos, histórico autorreferido de saúde, hábitos de vida e fatores de risco ocupacionais. Em seguida, são aferidos sinais clínicos como pressão arterial, parâmetros antropométricos e demais indicadores previstos no protocolo assistencial.";
+  const metodologiaTextoComplementar =
+    "Após a coleta, os dados passam por revisão técnica, padronização e consolidação estatística para análise populacional. Os resultados são apresentados em formato agregado, com estratificação por gênero, faixa etária e níveis de risco, permitindo direcionar ações preventivas, educativas e de acompanhamento em saúde ocupacional.";
   const lgpdTexto =
-    "Tratamento de dados pessoais sensíveis orientado pela Lei Geral de Proteção de Dados (Lei nº 13.709/2018), com princípio de minimização, finalidade assistencial/preventiva, controle de acesso e uso preferencial de visão agregada para governança executiva.";
+    "O tratamento das informações deste relatório observa a Lei Geral de Proteção de Dados Pessoais (Lei nº 13.709/2018), especialmente quanto aos dados pessoais sensíveis relacionados à saúde. A base legal é aplicada para fins de promoção, proteção e monitoramento da saúde ocupacional, respeitando os princípios de finalidade, necessidade, adequação, segurança e prevenção.";
+  const lgpdTextoComplementar =
+    "Os dados individuais são acessados apenas por profissionais autorizados, com sigilo ocupacional e uso restrito às atividades técnicas de saúde. A divulgação para gestão ocorre de forma consolidada e anonimizada, sem exposição nominal dos colaboradores, preservando confidencialidade, privacidade e conformidade ética no cuidado ocupacional.";
 
   const atividadesPreventivas: string[] = [];
   if (sindromeMetabolicaProxy >= 25) {
@@ -757,24 +1111,7 @@ export function RelatorioSaudePDF({ dados, logoPath }: { dados: DadosRelatorio; 
   const conclusaoExecutiva = `A consolidação dos achados indica risco ${faixaRisco.toLowerCase()} (${formatPct(
     indiceGlobalRisco
   )}) com predomínio de vetores cardiometabólicos. O ganho corporativo esperado depende de disciplina de execução no ciclo 90/180 dias, governança mensal e revisão de indicadores de saúde vinculados à produtividade e afastamentos.`;
-  const riscoCardiovascularComposto = clamp(
-    (percent(pressaoArterial.hipertensaoEst2 + pressaoArterial.hipertensaoEst3, total) +
-      percent(comorbidades.cardiovascular + comorbidades.has, total) +
-      percent(glicemiaAlta + comorbidades.diabetes, total)) / 3,
-    0,
-    100
-  );
-  const riscoMetabolicoCruzado: Segment[] = [
-    { label: "Obesidade (IMC)", value: imc.obesidade + imc.obesidadeGrave, color: palette.orangeStrong },
-    { label: "Hiperglicemia", value: glicemiaAlta, color: palette.wine },
-    { label: "Diabetes + Dislipidemia", value: comorbidades.diabetes + comorbidades.dislipidemia, color: palette.amber },
-  ];
-  const riscoCardiovascularCruzado: Segment[] = [
-    { label: "Obesidade", value: imc.obesidade + imc.obesidadeGrave, color: palette.orangeStrong },
-    { label: "PA alterada", value: riscoPressorico, color: palette.blueStrong },
-    { label: "HAS autorreferida", value: comorbidades.has, color: palette.wine },
-  ];
-
+  const preventiveColors = [palette.blueStrong, palette.amber, palette.orangeStrong, palette.wine, palette.cyanStrong];
   return (
     <Document>
       <Page size="A4" style={[styles.page, styles.coverPage]}>
@@ -783,13 +1120,13 @@ export function RelatorioSaudePDF({ dados, logoPath }: { dados: DadosRelatorio; 
 
         <View style={styles.coverBlock}>
           <View style={styles.coverTop}>
-            <Text style={[styles.metaLabel, { color: "#BFD4FF", textAlign: "center", marginTop: 90 }]}>Empresa</Text>
-            <Text style={[styles.coverTitle, { textAlign: "center", marginTop: 6 }]}>{empresa.nome}</Text>
-            <Text style={[styles.metaLabel, { color: "#BFD4FF", textAlign: "center", marginTop: 28 }]}>Data da coleta</Text>
-            <Text style={[styles.metaValue, { textAlign: "center", marginBottom: 0 }]}>{empresa.dataColeta || "Nao informada"}</Text>
+            <Text style={[styles.metaLabel, { color: "#BFD4FF", textAlign: "center", marginTop: 0 }]}>Empresa</Text>
+            <Text style={[styles.coverTitle, { textAlign: "center", marginTop: 8 }]}>{empresa.nome}</Text>
           </View>
 
-          <View />
+          <View style={styles.coverFooter}>
+            <Text style={styles.coverFooterText}>Data da coleta: {empresa.dataColeta || "Nao informada"}</Text>
+          </View>
         </View>
       </Page>
 
@@ -798,59 +1135,85 @@ export function RelatorioSaudePDF({ dados, logoPath }: { dados: DadosRelatorio; 
         <View style={styles.header}>
           <View>
             <Text style={styles.headerTitle}>Relatório de Saúde | {empresa.nome}</Text>
-            <Text style={styles.headerSubtitle}>Metodologia, LGPD e sumário do documento | Coleta: {empresa.dataColeta || "Não informada"}</Text>
+            <Text style={styles.headerSubtitle}>Cabeçalho de identificação, sumário, metodologia de análise e LGPD</Text>
           </View>
           {logoPath ? <Image src={logoPath} style={{ width: 42 }} /> : null}
+        </View>
+
+        <View style={styles.companyHeaderCard}>
+          <View style={styles.companyHeaderGrid}>
+            <View style={styles.companyHeaderItem}>
+              <Text style={styles.companyHeaderLabel}>Nome da empresa</Text>
+              <Text style={styles.companyHeaderValue}>{empresa.nome || "Nao informado"}</Text>
+            </View>
+            <View style={styles.companyHeaderItem}>
+              <Text style={styles.companyHeaderLabel}>Endereco</Text>
+              <Text style={styles.companyHeaderValue}>{empresa.endereco || "Nao informado"}</Text>
+            </View>
+            <View style={styles.companyHeaderItem}>
+              <Text style={styles.companyHeaderLabel}>Data da coleta</Text>
+              <Text style={styles.companyHeaderValue}>{empresa.dataColeta || "Nao informada"}</Text>
+            </View>
+            <View style={styles.companyHeaderItem}>
+              <Text style={styles.companyHeaderLabel}>Horario da coleta</Text>
+              <Text style={styles.companyHeaderValue}>{empresa.horario || "Nao informado"}</Text>
+            </View>
+            <View style={styles.companyHeaderItem}>
+              <Text style={styles.companyHeaderLabel}>Total de colaboradores</Text>
+              <Text style={styles.companyHeaderValue}>{String(empresa.qtdColaboradores || adesao.totalEquipe || adesao.totalParticipantes)}</Text>
+            </View>
+          </View>
+        </View>
+
+        <View style={styles.tocCard}>
+          <View style={styles.tocHead}>
+            <Text style={styles.tocTitle}>Sumário</Text>
+            <Text style={styles.tocLabel}>PAGINAS</Text>
+          </View>
+          <View style={styles.tocRow}>
+            <Text style={styles.tocText}>1. Metodologia de analise</Text>
+            <Text style={styles.tocPage}>2</Text>
+          </View>
+          <View style={styles.tocRow}>
+            <Text style={styles.tocText}>2. LGPD e sigilo ocupacional</Text>
+            <Text style={styles.tocPage}>2</Text>
+          </View>
+          <View style={styles.tocRow}>
+            <Text style={styles.tocText}>3. Mapeamento Demográfico</Text>
+            <Text style={styles.tocPage}>3</Text>
+          </View>
+          <View style={styles.tocRow}>
+            <Text style={styles.tocText}>4. Dashboard Clínico I (Risco cardiovascular)</Text>
+            <Text style={styles.tocPage}>4</Text>
+          </View>
+          <View style={styles.tocRow}>
+            <Text style={styles.tocText}>5. Dashboard Clínico II (Risco cardiometabólico)</Text>
+            <Text style={styles.tocPage}>5</Text>
+          </View>
+          <View style={styles.tocRow}>
+            <Text style={styles.tocText}>6. Alterações glicêmicas e cruzamentos por IMC</Text>
+            <Text style={styles.tocPage}>6</Text>
+          </View>
+          <View style={styles.tocRow}>
+            <Text style={styles.tocText}>7. Dashboard Clínico III (Proporção global)</Text>
+            <Text style={styles.tocPage}>6</Text>
+          </View>
+          <View style={styles.tocRow}>
+            <Text style={styles.tocText}>8. Conclusão e assinatura técnica</Text>
+            <Text style={styles.tocPage}>8</Text>
+          </View>
         </View>
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Metodologia de análise</Text>
           <Text style={styles.sectionText}>{metodologiaTexto}</Text>
-          <View style={styles.quote}>
-            <Text style={styles.quoteText}>
-              O IGR foi calibrado para apoiar decisão executiva, não para substituir diagnóstico individual.
-            </Text>
-          </View>
+          <Text style={[styles.sectionText, { marginTop: 6 }]}>{metodologiaTextoComplementar}</Text>
         </View>
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>LGPD e sigilo ocupacional</Text>
           <Text style={styles.sectionText}>{lgpdTexto}</Text>
-        </View>
-
-        <View style={styles.tocCard}>
-          <View style={styles.tocHead}>
-            <Text style={styles.tocTitle}>Sumário executivo do documento</Text>
-            <Text style={styles.tocLabel}>PAGINAS</Text>
-          </View>
-          <View style={styles.tocRow}>
-            <Text style={styles.tocText}>1. Sumário Executivo (estado geral e risco corporativo)</Text>
-            <Text style={styles.tocPage}>3</Text>
-          </View>
-          <View style={styles.tocRow}>
-            <Text style={styles.tocText}>2. Dashboard clínico I (gênero e faixas etárias)</Text>
-            <Text style={styles.tocPage}>3</Text>
-          </View>
-          <View style={styles.tocRow}>
-            <Text style={styles.tocText}>3. Dashboard clínico II (hipertensão, obesidade e glicemia)</Text>
-            <Text style={styles.tocPage}>4</Text>
-          </View>
-          <View style={styles.tocRow}>
-            <Text style={styles.tocText}>4. Risco integrado cardiometabólico e cardiovascular</Text>
-            <Text style={styles.tocPage}>5</Text>
-          </View>
-          <View style={styles.tocRow}>
-            <Text style={styles.tocText}>4.1 Comorbidades correlacionadas</Text>
-            <Text style={styles.tocPage}>6</Text>
-          </View>
-          <View style={styles.tocRow}>
-            <Text style={styles.tocText}>5. Plano de ação estratégico (90/180 dias)</Text>
-            <Text style={styles.tocPage}>7</Text>
-          </View>
-          <View style={[styles.tocRow, { borderBottomWidth: 0 }]}>
-            <Text style={styles.tocText}>6. Conclusão, atividades preventivas e assinatura</Text>
-            <Text style={styles.tocPage}>8</Text>
-          </View>
+          <Text style={[styles.sectionText, { marginTop: 6 }]}>{lgpdTextoComplementar}</Text>
         </View>
 
         <Footer pageNumber="Pagina 2" />
@@ -859,44 +1222,23 @@ export function RelatorioSaudePDF({ dados, logoPath }: { dados: DadosRelatorio; 
       <Page size="A4" style={styles.page}>
         <View style={styles.header}>
           <View>
-            <Text style={styles.headerTitle}>01. Sumário Executivo | 02. Mapeamento Epidemiológico</Text>
-            <Text style={styles.headerSubtitle}>Leitura C-Level com foco em priorização de risco corporativo</Text>
+            <Text style={styles.headerTitle}>05. Mapeamento Demográfico</Text>
+            <Text style={styles.headerSubtitle}>Proporções por gênero e faixa etária para direcionamento preventivo</Text>
           </View>
           {logoPath ? <Image src={logoPath} style={{ width: 42 }} /> : null}
         </View>
 
-        <View style={styles.kpiRow}>
-          <KpiCard
-            title="Colaboradores avaliados"
-            value={String(adesao.totalParticipantes)}
-            detail={`Base total: ${adesao.totalEquipe || adesao.totalParticipantes}`}
-            marginRight={8}
-          />
-          <KpiCard title="Adesão da campanha" value={formatPct(cobertura)} detail="Cobertura da população corporativa" marginRight={8} />
-          <KpiCard title="Índice Global de Risco" value={formatPct(indiceGlobalRisco)} detail={`Classificação: ${faixaRisco}`} />
-        </View>
-
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>1. Sumário Executivo (Executive Summary)</Text>
-          <Text style={styles.sectionText}>{sumarioExecutivo}</Text>
-          <View style={styles.quote}>
-            <Text style={styles.quoteText}>{leituraFinanceira}</Text>
-          </View>
-        </View>
-
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>2. Dashboard Clínico I (proporções populacionais)</Text>
+          <Text style={styles.sectionTitle}>5. Mapeamento Demográfico</Text>
           <View style={styles.chartDiscussionRow}>
             <View style={styles.chartCol}>
-              <Bars title="Gráfico 1 | Proporção por gênero" subtitle="Distribuição de homens e mulheres" total={total} data={generoData} />
+              <PieChart title="Gráfico 1 | Proporção por gênero" subtitle="Distribuição de homens e mulheres" total={total} data={generoData} />
               <Text style={styles.chartLegend}>Legenda: representação proporcional da composição por gênero.</Text>
             </View>
             <View style={{ width: 8 }} />
             <View style={[styles.discussionCol, { borderColor: palette.blueSoft }]}>
               <Text style={[styles.discussionTitle, { color: palette.blueStrong }]}>Leitura por gênero</Text>
-              <Text style={styles.discussionText}>
-                O perfil por gênero orienta campanhas específicas de prevenção e comunicação de risco conforme vulnerabilidades clínicas mais frequentes.
-              </Text>
+              <Text style={styles.discussionText}>{discussaoGenero}</Text>
             </View>
           </View>
           <View style={styles.chartDiscussionRow}>
@@ -919,44 +1261,58 @@ export function RelatorioSaudePDF({ dados, logoPath }: { dados: DadosRelatorio; 
         <PageVectors />
         <View style={styles.header}>
           <View>
-            <Text style={styles.headerTitle}>03. Dashboard Clínico II (Estágios e Proporções)</Text>
-            <Text style={styles.headerSubtitle}>Hipertensão, obesidade, alterações glicêmicas e batimentos cardíacos</Text>
+            <Text style={styles.headerTitle}>Dashboard Clínico I (Risco cardiovascular)</Text>
+            <Text style={styles.headerSubtitle}>Hipertensão por estágio, comparação pressórica e cruzamento por faixa etária</Text>
           </View>
           {logoPath ? <Image src={logoPath} style={{ width: 42 }} /> : null}
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>3. Proporções por estágio clínico</Text>
+          <Text style={styles.sectionTitle}>Gráfico 3 | Hipertensão por estágio</Text>
           <View style={styles.chartDiscussionRow}>
             <View style={styles.chartCol}>
-              <Bars
+              <PieChart
                 title="Gráfico 3 | Hipertensão por estágio"
-                subtitle="Proporção individual por classificação pressórica"
+                subtitle="Classificação pressórica pela diretriz brasileira 2025"
                 total={total}
                 data={hipertensaoData}
               />
+              <Text style={styles.chartLegend}>
+                Diretriz 2025: Normal (sem classificação otima): sistólica {"<="} 120 e diastólica {"<"} 80 | Pré-hipertensão: 121-139 ou 80-89 | HAS 1: 140-159 ou 90-99 | HAS 2: 160-179 ou 100-109 | HAS 3: {">="}180 ou {">="}110.
+              </Text>
             </View>
             <View style={{ width: 8 }} />
             <View style={styles.chartCol}>
               <Bars
-                title="Gráfico 4 | Obesidade por estágio"
-                subtitle="Sobrepeso, obesidade e obesidade grave"
+                title="Gráfico complementar | PA normal x alterações pressóricas"
+                subtitle="Comparação entre normalidade e alterações"
                 total={total}
-                data={obesidadeData}
+                data={pressaoNormalVsAlteradaData}
               />
             </View>
           </View>
-          {glicemiaData.length > 0 ? (
-            <View style={styles.chartDiscussionRow}>
-              <View style={styles.chartCol}>
-                <Bars title="Gráfico 5 | Alterações glicêmicas" subtitle="Hipoglicemia, normoglicemia e hiperglicemia" total={total} data={glicemiaData} />
-              </View>
-              <View style={{ width: 8 }} />
-              <View style={styles.chartCol}>
-                <Bars title="Gráfico 6 | Batimentos cardíacos" subtitle="Bradicardia, normocardia e taquicardia" total={total} data={fcData} />
-              </View>
+          <View style={styles.chartDiscussionRow}>
+            <View style={styles.chartCol}>
+              <Bars
+                title="Gráfico 4 | Alteração pressórica de acordo com faixa-etária"
+                subtitle="Cruzamento entre pressão alterada e idade"
+                total={total}
+                data={pressaoFaixaEtariaData}
+              />
             </View>
-          ) : null}
+            <View style={{ width: 8 }} />
+            <View style={styles.chartCol}>
+              <Bars title="Gráfico 5 | Batimentos cardíacos" subtitle="Bradicardia, normocardia e taquicardia" total={total} data={fcData} />
+            </View>
+          </View>
+          <View style={[styles.helperCard, { borderColor: palette.blueSoft }]}>
+            <View style={styles.helperHead}>
+              <Text style={[styles.helperIcon, { backgroundColor: palette.blueStrong }]}>i</Text>
+            </View>
+            <Text style={styles.helperText}>
+              A Hipertensão Arterial Sistêmica (HAS) é uma doença perigosa justamente por ser silenciosa. Sem apresentar sintomas visíveis na maioria das vezes, ela força as paredes dos vasos sanguíneos dia após dia, sobrecarregando órgãos vitais de forma irreversível.
+            </Text>
+          </View>
         </View>
 
         <Footer pageNumber="Pagina 4" />
@@ -966,45 +1322,50 @@ export function RelatorioSaudePDF({ dados, logoPath }: { dados: DadosRelatorio; 
         <PageVectors />
         <View style={styles.header}>
           <View>
-            <Text style={styles.headerTitle}>04. Risco Integrado Cardiometabólico e Cardiovascular</Text>
-            <Text style={styles.headerSubtitle}>Cruzamento de obesidade, glicemia, pressão arterial e comorbidades correlacionadas</Text>
+            <Text style={styles.headerTitle}>Dashboard Clínico II (Risco cardiometabólico)</Text>
+            <Text style={styles.headerSubtitle}>Obesidade por estágio e cruzamentos por faixa-etária e gênero</Text>
           </View>
           {logoPath ? <Image src={logoPath} style={{ width: 42 }} /> : null}
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>4. Análise cruzada de risco</Text>
+          <Text style={styles.sectionTitle}>Risco cardiometabólico</Text>
           <View style={styles.chartDiscussionRow}>
             <View style={styles.chartCol}>
               <Bars
-                title="Gráfico 7 | Risco metabólico cruzado"
-                subtitle="Obesidade, hiperglicemia e comorbidades correlacionadas"
+                title="Gráfico 6 | Obesidade por estágio"
+                subtitle="Sobrepeso, obesidade e obesidade grave"
                 total={total}
-                data={riscoMetabolicoCruzado}
+                data={obesidadeData}
               />
             </View>
             <View style={{ width: 8 }} />
-            <View style={[styles.discussionCol, { borderColor: palette.amberSoft }]}>
-              <Text style={[styles.discussionTitle, { color: palette.amber }]}>Leitura metabólica</Text>
-              <Text style={styles.discussionText}>{discussaoCruzada}</Text>
+            <View style={styles.chartCol}>
+              <Bars
+                title="Gráfico 7 | Obesidade por faixa-etária"
+                subtitle="IMC alterado por faixa etária"
+                total={total}
+                data={obesidadeFaixaEtariaData}
+              />
             </View>
           </View>
           <View style={styles.chartDiscussionRow}>
             <View style={styles.chartCol}>
               <Bars
-                title="Gráfico 8 | Risco cardiovascular cruzado"
-                subtitle="Obesidade, pressão arterial e hipertensão autorreferida"
+                title="Gráfico 8 | Obesidade por gênero"
+                subtitle="IMC alterado entre feminino e masculino"
                 total={total}
-                data={riscoCardiovascularCruzado}
+                data={obesidadeGeneroData}
               />
             </View>
-            <View style={{ width: 8 }} />
-            <View style={[styles.discussionCol, { borderColor: palette.wineSoft }]}>
-              <Text style={[styles.discussionTitle, { color: palette.wine }]}>Leitura cardiovascular</Text>
-              <Text style={styles.discussionText}>
-                Risco composto para eventos cardiovasculares: {formatPct(riscoCardiovascularComposto)}. O acúmulo de obesidade, pressão alterada e HAS autorreferida aumenta a chance de descompensações cardiovasculares.
-              </Text>
+          </View>
+          <View style={[styles.helperCard, { borderColor: palette.amberSoft }]}>
+            <View style={styles.helperHead}>
+              <Text style={[styles.helperIcon, { backgroundColor: palette.amber }]}>i</Text>
             </View>
+            <Text style={styles.helperText}>
+              A obesidade é uma doença crônica e inflamatória que vai muito além da questão estética. O acúmulo excessivo de gordura corporal, especialmente na região abdominal, funciona como um gatilho para diversas outras complicações severas, sobrecarregando o organismo como um todo.
+            </Text>
           </View>
         </View>
 
@@ -1015,25 +1376,69 @@ export function RelatorioSaudePDF({ dados, logoPath }: { dados: DadosRelatorio; 
         <PageVectors />
         <View style={styles.header}>
           <View>
-            <Text style={styles.headerTitle}>04.1 Comorbidades Correlacionadas</Text>
-            <Text style={styles.headerSubtitle}>Leitura complementar para estratificação de risco clínico</Text>
+            <Text style={styles.headerTitle}>Dashboard Clínico III (Proporção global)</Text>
+            <Text style={styles.headerSubtitle}>Risco glicêmico, correlação de alterações e comorbidades autorreferidas</Text>
           </View>
           {logoPath ? <Image src={logoPath} style={{ width: 42 }} /> : null}
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Comorbidades e correlação de risco</Text>
+          <Text style={styles.sectionTitle}>Risco glicêmico e proporção global</Text>
           <View style={styles.chartDiscussionRow}>
             <View style={styles.chartCol}>
-              <Bars title="Gráfico 9 | Proporção de comorbidades" subtitle="Condições autorreferidas mais prevalentes" total={total} data={comorbidadesData} />
+              <Bars title="Gráfico 9 | Alterações glicêmicas" subtitle="Hipoglicemia, normoglicemia e hiperglicemia" total={total} data={glicemiaData} />
             </View>
             <View style={{ width: 8 }} />
-            <View style={[styles.discussionCol, { borderColor: palette.blueSoft }]}>
-              <Text style={[styles.discussionTitle, { color: palette.blueStrong }]}>Cruzamento de comorbidades</Text>
-              <Text style={styles.discussionText}>
-                A convergência entre comorbidades cardiometabólicas e alterações pressóricas/glicêmicas sugere maior probabilidade de síndrome metabólica e risco de eventos cardiovasculares ao longo do ciclo assistencial.
-              </Text>
+            <View style={styles.chartCol}>
+              <Bars
+                title="Gráfico 10 | Alterações glicêmicas de acordo com IMC"
+                subtitle="Cruzamento entre glicemia alterada e IMC"
+                total={total}
+                data={glicemiaImcData}
+              />
             </View>
+          </View>
+          <View style={[styles.helperCard, { borderColor: palette.wineSoft }]}>
+            <View style={styles.helperHead}>
+              <Text style={[styles.helperIcon, { backgroundColor: palette.wine }]}>i</Text>
+            </View>
+            <Text style={styles.helperText}>
+              O Diabetes Mellitus é uma doença crônica silenciosa e progressiva, caracterizada pela incapacidade do corpo de produzir ou utilizar adequadamente a insulina. Isso faz com que os níveis de açúcar no sangue (glicose) fiquem constantemente elevados, agindo como um agente silenciosamente corrosivo por dentro do organismo ao longo dos anos.
+            </Text>
+          </View>
+        </View>
+
+        <Footer pageNumber="Pagina 6" />
+      </Page>
+
+      <Page size="A4" style={styles.page}>
+        <PageVectors />
+        <View style={styles.header}>
+          <View>
+            <Text style={styles.headerTitle}>Dashboard Clínico III (Proporção global)</Text>
+            <Text style={styles.headerSubtitle}>Correlação de alterações e comorbidades autorreferidas</Text>
+          </View>
+          {logoPath ? <Image src={logoPath} style={{ width: 42 }} /> : null}
+        </View>
+
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Proporção global</Text>
+          <ColumnsChart
+            title="Gráfico 11 | Correlação de alterações"
+            subtitle="Saudáveis, pressão alterada, IMC alterado e hiperglicemia"
+            total={total}
+            data={correlacaoGlobalData}
+          />
+          <View style={styles.chartDiscussionRow}>
+            <View style={styles.chartCol}>
+              <Bars title="Gráfico 12 | Proporção de comorbidades" subtitle="Condições autorreferidas mais prevalentes" total={total} data={comorbidadesData} />
+            </View>
+          </View>
+          <View style={[styles.helperCard, { borderColor: palette.blueSoft }]}>
+            <View style={styles.helperHead}>
+              <Text style={[styles.helperIcon, { backgroundColor: palette.blueStrong }]}>i</Text>
+            </View>
+            <Text style={styles.helperText}>{discussaoCruzada}</Text>
           </View>
         </View>
 
@@ -1044,88 +1449,30 @@ export function RelatorioSaudePDF({ dados, logoPath }: { dados: DadosRelatorio; 
         <PageVectors />
         <View style={styles.header}>
           <View>
-            <Text style={styles.headerTitle}>05. Plano de Ação Estratégico (Timeline 90/180 dias)</Text>
-            <Text style={styles.headerSubtitle}>Intervenção orientada por risco para redução progressiva da zona vinho para âmbar</Text>
-          </View>
-          {logoPath ? <Image src={logoPath} style={{ width: 42 }} /> : null}
-        </View>
-
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>5. Plano de Ação Estratégico</Text>
-          <View style={styles.table}>
-            <View style={styles.tableHead}>
-              <Text style={[styles.th, { width: "18%" }]}>Janela</Text>
-              <Text style={[styles.th, { width: "26%" }]}>Foco</Text>
-              <Text style={[styles.th, { width: "36%" }]}>Intervenções recomendadas</Text>
-              <Text style={[styles.th, { width: "20%" }]}>Indicador de sucesso</Text>
-            </View>
-
-            <View style={styles.tr}>
-              <Text style={[styles.td, { width: "18%" }]}>0-90 dias</Text>
-              <Text style={[styles.td, { width: "26%" }]}>Zona vinho/bordô (ação imediata)</Text>
-              <Text style={[styles.td, { width: "36%" }]}>
-                Estratificação nominal dos casos críticos; consulta médica ocupacional prioritária; plano intensivo para HAS estágio 2/3, hiperglicemia e obesidade grave; encaminhamento psicossocial para casos de saúde mental moderada/grave.
-              </Text>
-              <Text style={[styles.td, { width: "20%" }]}>
-                Reducao de pelo menos 15% dos casos criticos e aumento da adesao ao acompanhamento para pelo menos 80%.
-              </Text>
-            </View>
-
-            <View style={styles.tr}>
-              <Text style={[styles.td, { width: "18%" }]}>90-180 dias</Text>
-              <Text style={[styles.td, { width: "26%" }]}>Migração para zona âmbar</Text>
-              <Text style={[styles.td, { width: "36%" }]}>
-                Programa de cultura de saúde com trilha nutricional, atividade física orientada e higiene do sono; política antitabagismo e uso responsável de álcool; treinamento de lideranças para manejo de risco psicossocial.
-              </Text>
-              <Text style={[styles.td, { width: "20%" }]}>
-                Queda sustentada de absenteísmo médico, melhoria do IGR e estabilização de prevalências cardiometabólicas.
-              </Text>
-            </View>
-
-            <View style={[styles.tr, { borderBottomWidth: 0 }]}>
-              <Text style={[styles.td, { width: "18%" }]}>Governança</Text>
-              <Text style={[styles.td, { width: "26%" }]}>Comite mensal SST + RH + Liderancas</Text>
-              <Text style={[styles.td, { width: "36%" }]}>
-                Revisão mensal de KPI clínicos e operacionais, com gatilhos para escalonamento médico e ajuste de campanha por unidade/departamento.
-              </Text>
-              <Text style={[styles.td, { width: "20%" }]}>Painel ativo de risco e produtividade com revisão executiva bimestral.</Text>
-            </View>
-          </View>
-        </View>
-
-        <View style={styles.instruction}>
-            <Text style={styles.instructionTitle}>Nota metodológica</Text>
-          <Text style={styles.instructionText}>
-            Este relatório segue abordagem de medicina ocupacional baseada em risco populacional. As projeções de impacto financeiro são cenários técnicos e devem ser refinadas com
-            dados internos de custo médio por afastamento, sinistralidade e produtividade por área.
-          </Text>
-        </View>
-
-        <Footer pageNumber="Pagina 6" />
-      </Page>
-
-      <Page size="A4" style={styles.page}>
-        <PageVectors />
-        <View style={styles.header}>
-          <View>
-            <Text style={styles.headerTitle}>06. Conclusão, Atividades Preventivas e Assinatura</Text>
+            <Text style={styles.headerTitle}>08. Conclusão, Atividades Preventivas e Assinatura</Text>
             <Text style={styles.headerSubtitle}>Fechamento executivo orientado à implementação</Text>
           </View>
           {logoPath ? <Image src={logoPath} style={{ width: 42 }} /> : null}
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Conclusão executiva</Text>
+          <Text style={styles.sectionTitle}>Conclusão</Text>
           <Text style={styles.sectionText}>{conclusaoExecutiva}</Text>
         </View>
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Atividades preventivas recomendadas conforme resultados</Text>
-          {atividadesPreventivas.map((atividade, index) => (
-            <Text key={`atividade-${index}`} style={styles.listItem}>
-              {`${index + 1}. ${atividade}`}
-            </Text>
-          ))}
+          {atividadesPreventivas.map((atividade, index) => {
+            const color = preventiveColors[index % preventiveColors.length];
+            return (
+              <View key={`atividade-${index}`} style={[styles.preventiveCard, { borderColor: color }]}>
+                <View style={styles.preventiveRow}>
+                  <Text style={[styles.preventiveBadge, { backgroundColor: color }]}>{`${index + 1}`}</Text>
+                  <Text style={styles.preventiveText}>{atividade}</Text>
+                </View>
+              </View>
+            );
+          })}
         </View>
 
         <View style={styles.signatureCard}>

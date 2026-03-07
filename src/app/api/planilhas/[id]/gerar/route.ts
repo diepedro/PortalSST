@@ -42,7 +42,7 @@ export async function POST(
   try {
     const buffer = fs.readFileSync(filePath);
 
-    const { relatorio } = await createRelatorioFromBuffer({
+    const { relatorio, alertasProcessamento } = await createRelatorioFromBuffer({
       buffer,
       usuarioId: session.user.id,
       tipoPreferido: planilha.tipo,
@@ -51,6 +51,7 @@ export async function POST(
     return NextResponse.json({
       success: true,
       relatorio,
+      alertasProcessamento,
       downloadUrl: `/api/relatorios/${relatorio.id}/pdf`,
     });
   } catch (error) {

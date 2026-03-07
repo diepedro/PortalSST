@@ -33,17 +33,14 @@ export async function buildSaudeWorkbookFromColeta(payload: ColetaPayload) {
   ws.getCell("A2").value = "Endereco:";
   ws.getCell("B2").value = payload.empresa.endereco || "";
 
-  ws.getCell("A3").value = "Profissional Responsavel:";
-  ws.getCell("B3").value = payload.empresa.profissional || "";
+  ws.getCell("A3").value = "Data da Coleta:";
+  ws.getCell("B3").value = payload.empresa.dataColeta;
 
-  ws.getCell("A4").value = "Data da Coleta:";
-  ws.getCell("B4").value = payload.empresa.dataColeta;
+  ws.getCell("A4").value = "Horario:";
+  ws.getCell("B4").value = payload.empresa.horario || "";
 
-  ws.getCell("A5").value = "Horario:";
-  ws.getCell("B5").value = payload.empresa.horario || "";
-
-  ws.getCell("A6").value = "Total de Colaboradores:";
-  ws.getCell("B6").value = payload.empresa.qtdColaboradores || payload.participantes.length;
+  ws.getCell("A5").value = "Total de Colaboradores:";
+  ws.getCell("B5").value = payload.empresa.qtdColaboradores || payload.participantes.length;
 
   // Header da tabela na linha 7
   ws.getCell("A7").value = "Nome";
